@@ -1,0 +1,12 @@
+{
+  "name": "eagle-app-2",
+  "displayName": "eagle-app-2",
+  "expo": {
+    "name": "eagle-app-2",
+    "slug": "eagle-app-2",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
