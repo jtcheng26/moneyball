@@ -1,7 +1,7 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import React, { useState } from "react";
 import { useTailwind } from "tailwind-rn/dist";
-import CameraView from "../components/CameraView";
+import CameraView from "../components/VisionCameraView";
 
 export default function Home() {
   const tailwind = useTailwind();
@@ -15,17 +15,33 @@ export default function Home() {
     setStarted(false);
   }
   return (
-    <View style={tailwind("h-full w-full pt-10")}>
+    <View style={tailwind("h-full w-full")}>
       {started ? (
         <CameraView close={setEnd} />
       ) : (
-        <Pressable
-          style={tailwind("px-5 py-3 bg-blue-400 rounded-md")}
-          onPress={setStart}
-        >
+        <Pressable style={buttonStyle.button} onPress={setStart}>
           <Text style={tailwind("text-white font-bold text-xl")}>Start</Text>
         </Pressable>
       )}
     </View>
   );
 }
+
+const buttonStyle = StyleSheet.create({
+  button: {
+    shadowRadius: 5,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowColor: "black",
+    shadowOpacity: 0.4,
+    backgroundColor: "#2af",
+    position: "absolute",
+    left: 20,
+    right: 20,
+    bottom: 40,
+    padding: 10,
+    borderRadius: 10,
+  },
+});

@@ -7,20 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		00402D1B2866323E0044AA8A /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00402D1A2866323E0044AA8A /* File.swift */; };
+		00402D1D28663B390044AA8A /* YoloFrameProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00402D1C28663B390044AA8A /* YoloFrameProcessor.swift */; };
+		00402D2028663BBE0044AA8A /* YoloFrameProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 00402D1F28663BBE0044AA8A /* YoloFrameProcessor.m */; };
+		00402D222867641A0044AA8A /* yolov4-416-tiny.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 00402D212867641A0044AA8A /* yolov4-416-tiny.tflite */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		2E3004F49EDEEF8DED68656E /* libPods-eagleapp2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D169695A23A557C7A2051916 /* libPods-eagleapp2.a */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		96905EF65AED1B983A6B3ABC /* libPods-eagleapp2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 58EEBF8E8E6FB1BC6CAF49B5 /* libPods-eagleapp2.a */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		00402D1728662E7A0044AA8A /* libswiftWebKit.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswiftWebKit.tbd; path = usr/lib/swift/libswiftWebKit.tbd; sourceTree = SDKROOT; };
-		00402D192866323D0044AA8A /* eagleapp2-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "eagleapp2-Bridging-Header.h"; sourceTree = "<group>"; };
-		00402D1A2866323E0044AA8A /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
+		00402D1C28663B390044AA8A /* YoloFrameProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YoloFrameProcessor.swift; sourceTree = "<group>"; };
+		00402D1E28663B760044AA8A /* eagleapp2-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eagleapp2-Bridging-Header.h"; path = "../../../.Trash/eagleapp2-Bridging-Header.h"; sourceTree = "<group>"; };
+		00402D1F28663BBE0044AA8A /* YoloFrameProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = YoloFrameProcessor.m; sourceTree = "<group>"; };
+		00402D212867641A0044AA8A /* yolov4-416-tiny.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = "yolov4-416-tiny.tflite"; sourceTree = "<group>"; };
 		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* eagleapp2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = eagleapp2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = eagleapp2/AppDelegate.h; sourceTree = "<group>"; };
@@ -29,13 +33,13 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = eagleapp2/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = eagleapp2/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = eagleapp2/main.m; sourceTree = "<group>"; };
-		58EEBF8E8E6FB1BC6CAF49B5 /* libPods-eagleapp2.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-eagleapp2.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		6C2E3173556A471DD304B334 /* Pods-eagleapp2.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-eagleapp2.debug.xcconfig"; path = "Target Support Files/Pods-eagleapp2/Pods-eagleapp2.debug.xcconfig"; sourceTree = "<group>"; };
-		7A4D352CD337FB3A3BF06240 /* Pods-eagleapp2.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-eagleapp2.release.xcconfig"; path = "Target Support Files/Pods-eagleapp2/Pods-eagleapp2.release.xcconfig"; sourceTree = "<group>"; };
+		4CD0AC9492E8CBD86ED5E0CC /* Pods-eagleapp2.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-eagleapp2.debug.xcconfig"; path = "Target Support Files/Pods-eagleapp2/Pods-eagleapp2.debug.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = eagleapp2/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
+		D169695A23A557C7A2051916 /* libPods-eagleapp2.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-eagleapp2.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
+		FE72777A07DEE315C30D1E2E /* Pods-eagleapp2.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-eagleapp2.release.xcconfig"; path = "Target Support Files/Pods-eagleapp2/Pods-eagleapp2.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,7 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				96905EF65AED1B983A6B3ABC /* libPods-eagleapp2.a in Frameworks */,
+				2E3004F49EDEEF8DED68656E /* libPods-eagleapp2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,7 +76,7 @@
 				00402D1728662E7A0044AA8A /* libswiftWebKit.tbd */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
-				58EEBF8E8E6FB1BC6CAF49B5 /* libPods-eagleapp2.a */,
+				D169695A23A557C7A2051916 /* libPods-eagleapp2.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -87,13 +91,15 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				00402D1A2866323E0044AA8A /* File.swift */,
+				00402D212867641A0044AA8A /* yolov4-416-tiny.tflite */,
+				00402D1F28663BBE0044AA8A /* YoloFrameProcessor.m */,
+				00402D1E28663B760044AA8A /* eagleapp2-Bridging-Header.h */,
+				00402D1C28663B390044AA8A /* YoloFrameProcessor.swift */,
 				13B07FAE1A68108700A75B9A /* eagleapp2 */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				D65327D7A22EEC0BE12398D9 /* Pods */,
-				00402D192866323D0044AA8A /* eagleapp2-Bridging-Header.h */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -120,8 +126,8 @@
 		D65327D7A22EEC0BE12398D9 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				6C2E3173556A471DD304B334 /* Pods-eagleapp2.debug.xcconfig */,
-				7A4D352CD337FB3A3BF06240 /* Pods-eagleapp2.release.xcconfig */,
+				4CD0AC9492E8CBD86ED5E0CC /* Pods-eagleapp2.debug.xcconfig */,
+				FE72777A07DEE315C30D1E2E /* Pods-eagleapp2.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -133,13 +139,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "eagleapp2" */;
 			buildPhases = (
-				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
+				EB3A6E06AC08AC7FFFC31980 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F022414F080027D42C /* Start Packager */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				AF7BF8C823CE838DA4182532 /* [CP] Copy Pods Resources */,
+				3043591D950E02ACA5F493D7 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -190,6 +196,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
+				00402D222867641A0044AA8A /* yolov4-416-tiny.tflite in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -211,7 +218,25 @@
 			shellPath = /bin/sh;
 			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh\n../node_modules/expo-constants/scripts/get-app-config-ios.sh\n../node_modules/expo-updates/scripts/create-manifest-ios.sh\n";
 		};
-		08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */ = {
+		3043591D950E02ACA5F493D7 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-eagleapp2/Pods-eagleapp2-resources.sh",
+				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/AccessibilityResources.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AccessibilityResources.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-eagleapp2/Pods-eagleapp2-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		EB3A6E06AC08AC7FFFC31980 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -231,24 +256,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		AF7BF8C823CE838DA4182532 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-eagleapp2/Pods-eagleapp2-resources.sh",
-				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/AccessibilityResources.bundle",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AccessibilityResources.bundle",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-eagleapp2/Pods-eagleapp2-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		FD10A7F022414F080027D42C /* Start Packager */ = {
@@ -278,8 +285,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
-				00402D1B2866323E0044AA8A /* File.swift in Sources */,
+				00402D2028663BBE0044AA8A /* YoloFrameProcessor.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				00402D1D28663B390044AA8A /* YoloFrameProcessor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -300,7 +308,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6C2E3173556A471DD304B334 /* Pods-eagleapp2.debug.xcconfig */;
+			baseConfigurationReference = 4CD0AC9492E8CBD86ED5E0CC /* Pods-eagleapp2.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -334,7 +342,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7A4D352CD337FB3A3BF06240 /* Pods-eagleapp2.release.xcconfig */;
+			baseConfigurationReference = FE72777A07DEE315C30D1E2E /* Pods-eagleapp2.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;

@@ -5,6 +5,10 @@ import "@tensorflow/tfjs-react-native";
 import { Camera } from "expo-camera";
 import { cameraWithTensors } from "@tensorflow/tfjs-react-native";
 import { useTailwind } from "tailwind-rn/dist";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 
 const TensorCamera = cameraWithTensors(Camera);
 const tensorDims = {
@@ -12,6 +16,22 @@ const tensorDims = {
   height: 416,
   depth: 3,
 };
+
+enum DetectionClass {
+  Basketball = 0,
+  Hoop = 1,
+}
+
+interface DetectionResult {
+  box: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  score: number;
+  class: DetectionClass;
+}
 
 async function interpret_predictions(prediction: tf.Tensor<tf.Rank>) {
   const boxes_raw = prediction.slice([0, 0, 0], [-1, -1, 4]);
@@ -34,10 +54,10 @@ async function interpret_predictions(prediction: tf.Tensor<tf.Rank>) {
   );
   const selected_boxes = res;
 
-  const b = selected_boxes.dataSync();
-  const boxes_data = boxes.dataSync();
-  const scores_data = scores.dataSync();
-  const classes_data = classes.dataSync();
+  const b = await selected_boxes.data();
+  const boxes_data = await boxes.data();
+  const scores_data = await scores.data();
+  const classes_data = await classes.data();
 
   let boxes_final: Array<Uint8Array | Float32Array | Int32Array> = [];
   b.forEach((i) => boxes_final.push(boxes_data.slice(4 * i, 4 * i + 4)));
@@ -116,6 +136,68 @@ export default function CameraView({ close }: CameraViewProps) {
   const tailwind = useTailwind();
   const [ready, setReady] = useState(false);
   const [model, setModel] = useState<tf.GraphModel>();
+  const hoopDetection = useSharedValue<DetectionResult | null>(null);
+  const ballDetection = useSharedValue<DetectionResult | null>(null);
+
+  const hoopStyles = useAnimatedStyle(() => {
+    if (hoopDetection.value) {
+      console.log(
+        hoopDetection.value.box.x,
+        hoopDetection.value.box.y,
+        hoopDetection.value.box.width,
+        hoopDetection.value.box.height
+      );
+      return {
+        left:
+          100 *
+            (hoopDetection.value.box.x - hoopDetection.value.box.width / 2) +
+          "%",
+        top:
+          100 *
+            (hoopDetection.value.box.y - hoopDetection.value.box.height / 2) +
+          "%",
+        width: hoopDetection.value.box.width * 100 + "%",
+        height: hoopDetection.value.box.height * 100 + "%",
+        // position: "absolute",
+        borderWidth: 5,
+        borderColor: "red",
+        backgroundColor: "transparent",
+        borderRadius: 5,
+      };
+    }
+    return {};
+  });
+  // x * h = y
+  // x * w = y
+  const ballStyles = useAnimatedStyle(() => {
+    if (ballDetection.value) {
+      console.log(
+        ballDetection.value.box.x,
+        ballDetection.value.box.y,
+        ballDetection.value.box.width,
+        ballDetection.value.box.height
+      );
+      return {
+        left:
+          100 *
+            (ballDetection.value.box.x - ballDetection.value.box.width / 2) +
+          "%",
+        top:
+          100 *
+            (ballDetection.value.box.y -
+              (ballDetection.value.box.height * (1080 / 1920)) / 2) +
+          "%",
+        width: ballDetection.value.box.width * 100 + "%",
+        height: ballDetection.value.box.height * 100 * (1080 / 1920) + "%",
+        // position: "absolute",
+        borderWidth: 5,
+        borderColor: "green",
+        backgroundColor: "transparent",
+        borderRadius: 5,
+      };
+    }
+    return {};
+  });
 
   const [platformDims, setPlatformDims] = useState<{
     height: number;
@@ -158,6 +240,34 @@ export default function CameraView({ close }: CameraViewProps) {
 
   let requestAnimationFrameId = 0;
 
+  async function detectFromTensor(
+    imageTensor: tf.Tensor,
+    model: tf.GraphModel
+  ) {
+    const imageTensorProcessed = tf.tidy(() => processTestImage(imageTensor));
+    const [boxes, scores, classes] = await detect(imageTensorProcessed, model);
+    tf.dispose(imageTensorProcessed);
+
+    console.log(boxes);
+
+    const ret: DetectionResult[] = [];
+    boxes.forEach((b, i) => {
+      const bb = b as Float32Array;
+      ret.push({
+        box: {
+          x: bb[0],
+          y: bb[1],
+          width: bb[2],
+          height: bb[3],
+        },
+        score: scores[i] as number,
+        class: classes[i] as number,
+      });
+    });
+
+    return ret;
+  }
+
   useEffect(() => {
     return () => {
       cancelAnimationFrame(requestAnimationFrameId);
@@ -174,20 +284,39 @@ export default function CameraView({ close }: CameraViewProps) {
     const loop = async () => {
       if (frameCount % predictionFrameRate === 0) {
         const nextTensor = imageAsTensors.next();
-        if (!nextTensor.done) {
-          const imageTensor = nextTensor.value;
-          if (model) {
-            const imageTensorProcessed = tf.tidy(() =>
-              processTestImage(imageTensor)
-            );
-            const [boxes, scores, classes] = await detect(
-              imageTensorProcessed,
-              model
-            );
-            console.log(boxes, scores, classes);
-            tf.dispose(imageTensorProcessed);
-            tf.dispose(imageTensor);
+        const imageTensor = nextTensor.value;
+
+        if (!nextTensor.done && model) {
+          const st = performance.now();
+          const detections = await detectFromTensor(imageTensor, model);
+          if (detections.length > 0) {
+            function bestScore(
+              detections: DetectionResult[],
+              category: DetectionClass
+            ) {
+              const best = detections.reduce((prev, now) => {
+                if (now.class === category) {
+                  if (prev.class !== category || now.score > prev.score) {
+                    return now;
+                  }
+                }
+                return prev;
+              });
+
+              return best.class === category ? best : null;
+            }
+
+            const basketball = bestScore(detections, DetectionClass.Basketball);
+            const hoop = bestScore(detections, DetectionClass.Hoop);
+            if (basketball) ballDetection.value = basketball;
+            else ballDetection.value = null;
+            if (hoop) hoopDetection.value = hoop;
+            else hoopDetection.value = null;
+          } else {
+            ballDetection.value = null;
+            hoopDetection.value = null;
           }
+          console.log(performance.now() - st);
         }
 
         const numTensors = tf.memory().numTensors;
@@ -195,6 +324,8 @@ export default function CameraView({ close }: CameraViewProps) {
           console.log("Mem leak:", numTensors - prevTensors, "tensors gained.");
         }
         prevTensors = numTensors;
+
+        tf.dispose(imageTensor);
       }
 
       frameCount += 1;
@@ -224,12 +355,15 @@ export default function CameraView({ close }: CameraViewProps) {
               useCustomShadersToResize={false}
             />
           </View>
-          <Pressable
-            onPress={close}
-            style={tailwind("px-5 py-3 bg-blue-400 rounded-md")}
-          >
-            <Text style={tailwind("text-xl text-white font-bold")}>Close</Text>
-          </Pressable>
+          <View style={cameraStyles.overlay}>
+            <Animated.View style={hoopStyles} />
+            <Animated.View style={ballStyles} />
+            <Pressable onPress={close} style={cameraStyles.button}>
+              <Text style={tailwind("text-xl text-white font-bold")}>
+                Close
+              </Text>
+            </Pressable>
+          </View>
         </>
       ) : (
         <Text>Loading...</Text>
@@ -241,7 +375,6 @@ export default function CameraView({ close }: CameraViewProps) {
 const cameraStyles = StyleSheet.create({
   camera: {
     position: "absolute",
-    top: 60,
     width: "100%",
     height: "100%",
     zIndex: 1,
@@ -255,7 +388,30 @@ const cameraStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
-    height: "85%",
+    height: "100%",
     backgroundColor: "#fff",
+  },
+  overlay: {
+    zIndex: 1000,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "transparent",
+    position: "absolute",
+  },
+  button: {
+    shadowRadius: 5,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowColor: "black",
+    shadowOpacity: 0.4,
+    backgroundColor: "#f64",
+    position: "absolute",
+    left: 20,
+    right: 20,
+    bottom: 40,
+    padding: 10,
+    borderRadius: 10,
   },
 });

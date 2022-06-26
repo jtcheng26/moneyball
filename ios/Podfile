@@ -10,6 +10,13 @@ target 'eagleapp2' do
 
   use_react_native!(:path => config["reactNativePath"])
 
+  use_modular_headers!
+
+  pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec', :modular_headers => false
+
+  pod 'TensorFlowLiteSwift'   
+  pod 'TensorFlowLiteSelectTfOps', '~> 0.0.1-nightly'
+
   # Uncomment to opt-in to using Flipper
   #
   # if !ENV['CI']
