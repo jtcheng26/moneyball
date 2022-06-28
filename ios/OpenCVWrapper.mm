@@ -229,7 +229,7 @@ static int shotState = NO_MOTION; // global shot state, either IN_MOTION, NO_MOT
 //  if (heat > (n * n) / 4) {
 //    circles.push_back(cv::Vec3f(center.first, center.second, n/2));
 //  }
-  HoughCircles(*image, circles, cv::HOUGH_GRADIENT, 2, (hoopLoc[2] - hoopLoc[0]) / 2,32, 36, minSize, maxSize);
+  HoughCircles(*image, circles, cv::HOUGH_GRADIENT, 2, (hoopLoc[2] - hoopLoc[0]) / 2,32, 34, minSize, maxSize);
   
   return circles;
 }

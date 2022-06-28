@@ -10,9 +10,13 @@ import { useTailwind } from "tailwind-rn/dist";
 import { yoloDetector } from "../plugins/yoloDetector";
 import "react-native-reanimated";
 import Animated, {
+  Easing,
   useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
+  withDecay,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { Svg, Rect, Circle } from "react-native-svg";
 import { ReText } from "react-native-redash";
@@ -46,6 +50,7 @@ interface BallDetection {
     cy: number; // center
     radius: number;
   };
+  opacity: number;
 }
 
 interface VisionCameraViewProps {
@@ -112,15 +117,20 @@ export default function VisionCameraView({ close }: VisionCameraViewProps) {
         cx: ballDetection.value.box.cx,
         cy: ballDetection.value.box.cy,
         r: ballDetection.value.box.radius,
-        fill: "rgba(0,0,255, 0)",
+        fill: "rgba(0,0,0, 0)",
         strokeWidth: "10",
-        stroke: "rgb(255, 100, 50)",
+        stroke: "rgba(255, 100, 50, 1)",
+        strokeOpacity: withTiming(ballDetection.value.opacity, {
+          duration: 250,
+          easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+        }),
       };
     } else {
       return {
         cx: 0,
         cy: 0,
         r: 0,
+        strokeOpacity: 0,
       };
     }
   });
@@ -152,17 +162,30 @@ export default function VisionCameraView({ close }: VisionCameraViewProps) {
           cy: detectionsRes[2],
           radius: detectionsRes[3],
         },
+        opacity: 1,
       };
-    }
-
-    if (detectionsRes[0] === 1) shotState.value = "Score";
-    else if (detectionsRes[0] == -1) shotState.value = "Miss";
-    else {
-      noShotFrames.value += 1;
-      if (noShotFrames.value >= 100) {
+    } else {
+      if (noShotFrames.value < 50) noShotFrames.value += 1;
+      if (noShotFrames.value == 50) {
         shotState.value = "";
         noShotFrames.value = 0;
+        ballDetection.value = {
+          box: {
+            cx: ballDetection.value?.box.cx || 0,
+            cy: ballDetection.value?.box.cy || 0,
+            radius: ballDetection.value?.box.radius || 0,
+          },
+          opacity: 0,
+        };
       }
+    }
+
+    if (detectionsRes[0] === 1) {
+      shotState.value = "Score";
+      noShotFrames.value = 0;
+    } else if (detectionsRes[0] == -1) {
+      shotState.value = "Miss";
+      noShotFrames.value = 0;
     }
 
     console.log(Date.now() - st);
