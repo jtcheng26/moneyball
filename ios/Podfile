@@ -15,7 +15,7 @@ target 'eagleapp2' do
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec', :modular_headers => false
 
   pod 'TensorFlowLiteSwift'   
-  pod 'TensorFlowLiteSelectTfOps', '~> 0.0.1-nightly'
+  pod 'OpenCV'
 
   # Uncomment to opt-in to using Flipper
   #

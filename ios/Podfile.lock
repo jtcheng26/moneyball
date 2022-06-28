@@ -56,6 +56,7 @@ PODS:
     - React-jsi (= 0.64.0)
     - ReactCommon/turbomodule/core (= 0.64.0)
   - glog (0.3.5)
+  - OpenCV (4.3.0)
   - RCT-Folly (2020.01.13.00):
     - boost-for-react-native
     - DoubleConversion
@@ -353,7 +354,6 @@ PODS:
   - TensorFlowLiteC (2.9.1):
     - TensorFlowLiteC/Core (= 2.9.1)
   - TensorFlowLiteC/Core (2.9.1)
-  - TensorFlowLiteSelectTfOps (0.0.1-nightly.20220625)
   - TensorFlowLiteSwift (2.9.1):
     - TensorFlowLiteSwift/Core (= 2.9.1)
   - TensorFlowLiteSwift/Core (2.9.1):
@@ -405,6 +405,7 @@ DEPENDENCIES:
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `../node_modules/react-native/React/FBReactNativeSpec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
+  - OpenCV
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTRequired (from `../node_modules/react-native/Libraries/RCTRequired`)
   - RCTTypeSafety (from `../node_modules/react-native/Libraries/TypeSafety`)
@@ -436,7 +437,6 @@ DEPENDENCIES:
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
-  - TensorFlowLiteSelectTfOps (~> 0.0.1-nightly)
   - TensorFlowLiteSwift
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
   - UMBarCodeScannerInterface (from `../node_modules/unimodules-barcode-scanner-interface/ios`)
@@ -457,8 +457,8 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - boost-for-react-native
+    - OpenCV
     - TensorFlowLiteC
-    - TensorFlowLiteSelectTfOps
     - TensorFlowLiteSwift
 
 EXTERNAL SOURCES:
@@ -607,6 +607,7 @@ SPEC CHECKSUMS:
   FBLazyVector: 49cbe4b43e445b06bf29199b6ad2057649e4c8f5
   FBReactNativeSpec: d1e96d43cf0e2010aca34993c63e75d085a5e6dc
   glog: 73c2498ac6884b13ede40eda8228cb1eee9d9d62
+  OpenCV: 681e0451c1e54c5930a8922277f817ed5d5ab459
   RCT-Folly: ec7a233ccc97cc556cf7237f0db1ff65b986f27c
   RCTRequired: 2f8cb5b7533219bf4218a045f92768129cf7050a
   RCTTypeSafety: 512728b73549e72ad7330b92f3d42936f2a4de5b
@@ -637,7 +638,6 @@ SPEC CHECKSUMS:
   RNScreens: e8e8dd0588b5da0ab57dcca76ab9b2d8987757e0
   RNSVG: 302bfc9905bd8122f08966dc2ce2d07b7b52b9f8
   TensorFlowLiteC: 0a765860195fae345ca7398e33b07c80104c4b61
-  TensorFlowLiteSelectTfOps: 145b8a2e3edd19476a5368597ed5bdb42868c4f2
   TensorFlowLiteSwift: 0b584ad1fac27c0015609056a5ab4e7692bd1af3
   UMAppLoader: fe2708bb0ac5cd70052bc207d06aa3b7e72b9e97
   UMBarCodeScannerInterface: 79f92bea5f7af39b381a4c82298105ceb537408a
@@ -655,6 +655,6 @@ SPEC CHECKSUMS:
   VisionCamera: 0a6548e1f0a6bfd5c9d0a452417e45c120cabb85
   Yoga: 8c8436d4171c87504c648ae23b1d81242bdf3bbf
 
-PODFILE CHECKSUM: 7b1dc67c5148eaa2635a33276d74c935b701f0dd
+PODFILE CHECKSUM: 2f7a31160f63278182377f032ce8af3b79682a43
 
 COCOAPODS: 1.10.1

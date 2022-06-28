@@ -8,7 +8,20 @@
 import Foundation
 import TensorFlowLite
 import CoreImage
+import VideoToolbox
 
+extension UIImage {
+    public convenience init?(pixelBuffer: CVPixelBuffer) {
+        var cgImage: CGImage?
+        VTCreateCGImageFromCVPixelBuffer(pixelBuffer, options: nil, imageOut: &cgImage)
+
+        guard let cgImage = cgImage else {
+            return nil
+        }
+
+        self.init(cgImage: cgImage)
+    }
+}
 
 @objc(YoloFrameProcessor)
 public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
@@ -16,6 +29,8 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
   static var detector: Interpreter?
   static var scale: CGFloat = 1.0
   static var aspectRatio: CGFloat = 1.0
+  static var gaming: Bool = false;
+  static var written: Int = 0;
   
   public static func resize(sourceImage: CIImage) -> CIImage {
     let resizeFilter = CIFilter(name:"CILanczosScaleTransform")!
@@ -189,20 +204,91 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
     }
   }
 
+  public static func loadImageFromBundle(fileName: String, fileExt: String) -> UIImage? {
+    let path = Bundle.main.path(
+      forResource: fileName,
+      ofType: fileExt
+    )!;
+    let image = UIImage(contentsOfFile: path);
+    return image;
+  }
+
  @objc
  public static func callback(_ frame: Frame!, withArgs args: [Any]!) -> Any! {
-//   let orientation = frame.orientation
+   let startDate = Date()
    guard let imageBuffer = CMSampleBufferGetImageBuffer(frame.buffer) else {
      return nil
    }
+//
+//   NSLog("ExamplePlugin: \(CVPixelBufferGetWidth(imageBuffer)) x \(CVPixelBufferGetHeight(imageBuffer)) Image. Logging \(args.count) parameters:")
    
-   NSLog("ExamplePlugin: \(CVPixelBufferGetWidth(imageBuffer)) x \(CVPixelBufferGetHeight(imageBuffer)) Image. Logging \(args.count) parameters:")
-     let mlImage = CIImage(cvPixelBuffer: imageBuffer)
-     let startDate = Date()
-     let detectionResult = YoloFrameProcessor.detect(ciImage: mlImage)
-     let interval = Date().timeIntervalSince(startDate) * 1000
-     print(interval)
+//   let ciImage = CIImage(cvPixelBuffer: imageBuffer)
+   let uiImage = UIImage(pixelBuffer: imageBuffer)!
+   YoloFrameProcessor.written += 1
+//   print(uiImage.cgImage?.colorSpace?.name)
+//   print(uiImage.cgImage?.bitmapInfo.rawValue)
+//   print(uiImage.cgImage?.alphaInfo.rawValue)
+//   print(uiImage.cgImage?.bitsPerComponent.description)
+//   print(uiImage.cgImage?.bytesPerRow.description)
+//   UIImageWriteToSavedPhotosAlbum(uiImage, nil, nil, nil);
+   
+   var detectionResult: Array<Float> = []
+   
+   if args.count == 1 && args[0] as! Bool == true {
+     detectionResult = [0.0] + (OpenCVWrapper.updateBackground(uiImage, leftArg: 400, topArg: 400, rightArg: 600, bottomArg: 600) as! Array<Float>);
+//     if YoloFrameProcessor.written == 100 {
+//       let testUIImage = OpenCVWrapper.testFunc2();
+//       UIImageWriteToSavedPhotosAlbum(testUIImage, nil, nil, nil);
+//       YoloFrameProcessor.written += 1
+//     } else if (YoloFrameProcessor.written < 100) {
+//       YoloFrameProcessor.written += 1
+//     }
+     gaming = true;
+   } else if (YoloFrameProcessor.gaming) {
+     detectionResult = OpenCVWrapper.processFrame(uiImage) as! Array<Float> + detectionResult;
+//     if (YoloFrameProcessor.written % 5 == 0) {
+//       let testUIImage = OpenCVWrapper.testFunc(uiImage)
+//       let testUIImage2 = OpenCVWrapper.testFunc2()
+//       let testUIImage3 = OpenCVWrapper.testFunc3(uiImage)
+//       let testUIImage4 = OpenCVWrapper.testFunc4(uiImage);
+//       UIImageWriteToSavedPhotosAlbum(uiImage, nil, nil, nil);
+//       UIImageWriteToSavedPhotosAlbum(testUIImage, nil, nil, nil);
+//       UIImageWriteToSavedPhotosAlbum(testUIImage2, nil, nil, nil)
+//       UIImageWriteToSavedPhotosAlbum(testUIImage4, nil, nil, nil)
+//       YoloFrameProcessor.written += 1;
+//     }
+     
+     if detectionResult[0] == 1 {
+       UIImageWriteToSavedPhotosAlbum(uiImage, nil, nil, nil);
+       let testUIImage4 = OpenCVWrapper.testFunc4(uiImage);
+       UIImageWriteToSavedPhotosAlbum(testUIImage4, nil, nil, nil)
+     }
+     
+//     if YoloFrameProcessor.written % 50 == 0 {
+//       let testUIImage4 = OpenCVWrapper.testFunc4(loadImageFromBundle(fileName: "IMG_4537", fileExt: "JPG")!)
+//       UIImageWriteToSavedPhotosAlbum(testUIImage4, nil, nil, nil)
+//     }
+   }
 
-     return detectionResult
+//   if (!YoloFrameProcessor.written) {
+//     YoloFrameProcessor.written = true;
+//     let testImageBg = loadImageFromBundle(fileName: "img_203", fileExt: "jpg")!;
+//     let testImageNames = ["img_212", "img_249", "img_250", "img_251", "img_252", "img_253", "img_254"];
+//     OpenCVWrapper.updateBackground(testImageBg, leftArg: 600, topArg: 175, rightArg: 645, bottomArg: 213);
+//     let res = OpenCVWrapper.processFrame(testImageBg);
+//     print(res);
+//
+//     let testImages = testImageNames.map {loadImageFromBundle(fileName: $0, fileExt: "jpg")!}
+//     testImages.forEach {
+//       let testRes = OpenCVWrapper.testFunc($0);
+//         UIImageWriteToSavedPhotosAlbum(testRes, nil, nil, nil);
+//     }
+//
+//   }
+   
+   let interval = Date().timeIntervalSince(startDate) * 1000
+   print(interval)
+   
+   return detectionResult
  }
 }
