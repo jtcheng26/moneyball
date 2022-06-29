@@ -31,12 +31,13 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
   static var aspectRatio: CGFloat = 1.0
   static var gaming: Bool = false;
   static var written: Int = 0;
+  static var inputSize: Int = 416;
   
   public static func resize(sourceImage: CIImage) -> CIImage {
     let resizeFilter = CIFilter(name:"CILanczosScaleTransform")!
     
-    YoloFrameProcessor.scale = 416 / sourceImage.extent.height
-    YoloFrameProcessor.aspectRatio = 416 / (sourceImage.extent.width * scale)
+    YoloFrameProcessor.scale = CGFloat(YoloFrameProcessor.inputSize) / sourceImage.extent.height
+    YoloFrameProcessor.aspectRatio = CGFloat(YoloFrameProcessor.inputSize) / (sourceImage.extent.width * scale)
 
     // Apply resizing
     resizeFilter.setValue(sourceImage, forKey: kCIInputImageKey)
@@ -54,18 +55,18 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
 
     let context = CGContext(
         data: nil,
-        width: 416, height: 416,
-        bitsPerComponent: 8, bytesPerRow: 416 * 4,
+        width: YoloFrameProcessor.inputSize, height: YoloFrameProcessor.inputSize,
+        bitsPerComponent: 8, bytesPerRow: YoloFrameProcessor.inputSize * 4,
         space: CGColorSpaceCreateDeviceRGB(),
         bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue
     )!
 
-    context.draw(image, in: CGRect(x: 0, y: 0, width: 416, height: 416))
+    context.draw(image, in: CGRect(x: 0, y: 0, width: YoloFrameProcessor.inputSize, height: YoloFrameProcessor.inputSize))
     let imageData = context.data!
 
     var inputData = Data()
-    for row in 0 ..< 416 {
-        for col in 0 ..< 416 {
+    for row in 0 ..< YoloFrameProcessor.inputSize {
+        for col in 0 ..< YoloFrameProcessor.inputSize {
             let offset = 4 * (row * context.width + col)
             // (Ignore offset 0, the unused alpha channel)
             let red = imageData.load(fromByteOffset: offset+1, as: UInt8.self)
@@ -124,8 +125,10 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
     let boxesUnfiltered = Array(boxesBuffer)
     let scoresUnfiltered = Array(scoresBuffer)
     
+    print(scoresUnfiltered)
+    
     var filteredIndices: Array<Int> = []
-    let SCORE_THRESHOLD = Float32(0.7)
+    let SCORE_THRESHOLD = Float32(0.4)
     for i in 0 ..< scoresUnfiltered.count {
       if scoresUnfiltered[i] > SCORE_THRESHOLD {
         filteredIndices.append(i)
@@ -140,13 +143,13 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
     print(filteredIndices)
     
     for i in filteredIndices {
-      let w = boxesUnfiltered[4 * i+2] / 416 / 2
-      let h = boxesUnfiltered[4 * i+3] / 416 / 2
-      let x = side == 0 ? boxesUnfiltered[4 * i] / 416 / 2 : 0.5 + (boxesUnfiltered[4*i] / 416 / 2)
-      let y = boxesUnfiltered[4 * i+1] / 416 / 2
+      let w = boxesUnfiltered[4 * i+2] / Float(YoloFrameProcessor.inputSize) / 2
+      let h = boxesUnfiltered[4 * i+3] / Float(YoloFrameProcessor.inputSize) / 2
+      let x = side == 0 ? boxesUnfiltered[4 * i] / Float(YoloFrameProcessor.inputSize) / 2 : 0.5 + (boxesUnfiltered[4*i] / Float(YoloFrameProcessor.inputSize) / 2)
+      let y = boxesUnfiltered[4 * i+1] / Float(YoloFrameProcessor.inputSize) / 2
       
       // camera should not be that close to the basket
-      if w < 0.26 && h < 0.26 && (boxes.count < 4 || scoresUnfiltered[i] > scores[0]) {
+      if w < 0.26 && h < 0.26 && (boxes.count < 4 || w * h < boxes[2] * boxes[3]) {
         numDetections += 1
         boxes = [x, y, w, h]
         // only 1 class
@@ -176,7 +179,7 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
         cropped = ciImage.cropped(to: CGRect(x:0, y:h/2, width:w / 2, height:h / 2))
       } else {
         // TODO: figure out orientation
-        cropped = ciImage.cropped(to:CGRect(x:w/2,y:h/2,width:w/2,height:h/2))
+        cropped = ciImage.cropped(to: CGRect(x:w/2,y:h/2,width:w/2,height:h/2))
       }
       let resizedCIImage = resize(sourceImage: cropped)
       let inputData = prepareInput(ciImage: resizedCIImage)
@@ -240,7 +243,7 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
      return nil
    }
 //
-//   NSLog("ExamplePlugin: \(CVPixelBufferGetWidth(imageBuffer)) x \(CVPixelBufferGetHeight(imageBuffer)) Image. Logging \(args.count) parameters:")
+   NSLog("ExamplePlugin: \(CVPixelBufferGetWidth(imageBuffer)) x \(CVPixelBufferGetHeight(imageBuffer)) Image. Logging \(args.count) parameters:")
    
 //   let ciImage = CIImage(cvPixelBuffer: imageBuffer)
    let uiImage = UIImage(pixelBuffer: imageBuffer)!
@@ -265,6 +268,8 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
    var detectionResult: Array<Float> = []
    
    if args.count == 1 && args[0] as! Bool == true {
+     print(uiImage.size.width)
+     print(uiImage.size.height)
      if YoloFrameProcessor.written >= 10 {
        let ciImage = CIImage(cgImage: uiImage.cgImage!)
 //       let cp = ciImage.cropped(to: CGRect(x:0, y:0, width:Int(uiImage.size.width / 2), height:Int(uiImage.size.height / 2)))
