@@ -250,62 +250,70 @@ export default function VisionCameraView() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
-      <StatusBar barStyle="light-content" />
-      {device && format ? (
-        <View>
-          <View
-            style={[
-              cameraStyles.cameraContainer,
-              {
-                height:
-                  orientation === "PORTRAIT"
-                    ? (windowWidth * FRAME_HEIGHT) / FRAME_WIDTH
-                    : "100%",
-                width:
-                  orientation === "PORTRAIT"
-                    ? "100%"
-                    : (windowWidth * FRAME_HEIGHT) / FRAME_WIDTH,
-                // marginTop: orientation === "PORTRAIT" ? 50 : 0,
-                // marginLeft: orientation === "LANDSCAPE" ? 50 : 0,
-                backgroundColor: "black",
-              },
-            ]}
-          >
-            <Camera
-              style={cameraStyles.camera}
-              device={device}
-              isActive={active}
-              frameProcessor={frameProcessor}
-              frameProcessorFps={30}
-              enableZoomGesture={true}
-              format={format}
+    <View>
+      <SafeAreaView
+        style={{ backgroundColor: "black" }}
+        edges={
+          orientation === "PORTRAIT" ? ["top", "bottom"] : ["left", "right"]
+        }
+      >
+        <StatusBar barStyle="light-content" />
+        {device && format ? (
+          <View>
+            <View
+              style={[
+                cameraStyles.cameraContainer,
+                {
+                  height:
+                    orientation === "PORTRAIT"
+                      ? (windowWidth * FRAME_HEIGHT) / FRAME_WIDTH
+                      : "100%",
+                  width:
+                    orientation === "PORTRAIT"
+                      ? "100%"
+                      : (windowWidth * FRAME_HEIGHT) / FRAME_WIDTH,
+                  // marginTop: orientation === "PORTRAIT" ? 50 : 0,
+                  // marginLeft: orientation === "LANDSCAPE" ? 50 : 0,
+                  backgroundColor: "black",
+                },
+              ]}
             >
-              <View
-                style={[
-                  cameraStyles.overlay,
-                  {
-                    height:
-                      orientation === "PORTRAIT"
-                        ? (windowWidth * FRAME_HEIGHT) / FRAME_WIDTH
-                        : "100%",
-                    width:
-                      orientation === "PORTRAIT"
-                        ? "100%"
-                        : (windowWidth * FRAME_HEIGHT) / FRAME_WIDTH,
-                  },
-                ]}
+              <Camera
+                style={cameraStyles.camera}
+                device={device}
+                isActive={active}
+                frameProcessor={frameProcessor}
+                frameProcessorFps={30}
+                enableZoomGesture={true}
+                format={format}
               >
-                <Svg
-                  style={StyleSheet.absoluteFill}
-                  viewBox={`0 0 ${
-                    orientation === "PORTRAIT" ? FRAME_WIDTH : FRAME_HEIGHT
-                  } ${orientation === "PORTRAIT" ? FRAME_HEIGHT : FRAME_WIDTH}`}
-                >
-                  <AnimatedRect animatedProps={rectProps} />
-                  <AnimatedCircle animatedProps={ballProps} />
-                </Svg>
                 <View
+                  style={[
+                    cameraStyles.overlay,
+                    {
+                      height:
+                        orientation === "PORTRAIT"
+                          ? (windowWidth * FRAME_HEIGHT) / FRAME_WIDTH
+                          : "100%",
+                      width:
+                        orientation === "PORTRAIT"
+                          ? "100%"
+                          : (windowWidth * FRAME_HEIGHT) / FRAME_WIDTH,
+                    },
+                  ]}
+                >
+                  <Svg
+                    style={StyleSheet.absoluteFill}
+                    viewBox={`0 0 ${
+                      orientation === "PORTRAIT" ? FRAME_WIDTH : FRAME_HEIGHT
+                    } ${
+                      orientation === "PORTRAIT" ? FRAME_HEIGHT : FRAME_WIDTH
+                    }`}
+                  >
+                    <AnimatedRect animatedProps={rectProps} />
+                    <AnimatedCircle animatedProps={ballProps} />
+                  </Svg>
+                  {/* <View
                   style={[shotStateContainerStyles, cameraStyles.statusView]}
                 >
                   <ReText
@@ -316,34 +324,72 @@ export default function VisionCameraView() {
                       fontWeight: "bold",
                     }}
                   />
-                </View>
-                <View style={cameraStyles.buttonView}>
+                </View> */}
+                  {/* <Pressable
+                    onPress={flipCamera}
+                    style={{
+                      position: "absolute",
+                      right: 0,
+                    }}
+                  >
+                    <Text style={tailwind("text-xl text-white font-bold")}>
+                      Flip
+                    </Text>
+                  </Pressable> */}
+                  {/* <View style={cameraStyles.buttonView}> */}
                   <Pressable
                     onPress={() => {
                       if (detectedHoop) updateHoop.value = false;
                     }}
-                    style={cameraStyles.button}
+                    style={[
+                      cameraStyles.recordButton,
+                      {
+                        borderColor: "red",
+                        borderWidth: !updateHoop ? 5 : 0,
+                        right: orientation === "LANDSCAPE" ? 20 : "auto",
+                        bottom: orientation === "PORTRAIT" ? 20 : "auto",
+                      },
+                    ]}
                   >
-                    <Text style={tailwind("text-xl text-white font-bold")}>
-                      {format.photoWidth}
-                    </Text>
+                    {/* <Text style={tailwind("text-xl text-white font-bold")}>
+                        
+                      </Text> */}
                   </Pressable>
-                  <Pressable onPress={flipCamera} style={cameraStyles.button}>
-                    <Text style={tailwind("text-xl text-white font-bold")}>
-                      Flip
-                    </Text>
-                  </Pressable>
+                  {/* </View> */}
                 </View>
-              </View>
-            </Camera>
+              </Camera>
+            </View>
           </View>
-        </View>
-      ) : (
-        <Text>Loading...</Text>
-      )}
-    </SafeAreaView>
+        ) : (
+          <Text>Loading...</Text>
+        )}
+      </SafeAreaView>
+      <View
+        style={
+          orientation === "LANDSCAPE" ? barStyles.sidebar : { display: "none" }
+        }
+      >
+        <Pressable onPress={flipCamera} style={cameraStyles.button}>
+          <Text style={tailwind("text-xl text-white font-bold")}>Flip</Text>
+        </Pressable>
+      </View>
+    </View>
   );
 }
+
+const barStyles = StyleSheet.create({
+  sidebar: {
+    position: "absolute",
+    right: 0,
+    display: "flex",
+    height: "100%",
+    width: 90,
+    flexDirection: "column",
+    alignItems: "center",
+    padding: 10,
+    // backgroundColor: "white",
+  },
+});
 
 const cameraStyles = StyleSheet.create({
   camera: {
@@ -369,6 +415,10 @@ const cameraStyles = StyleSheet.create({
     zIndex: 2,
     width: "100%",
     backgroundColor: "transparent",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttonView: {
     position: "absolute",
@@ -388,8 +438,14 @@ const cameraStyles = StyleSheet.create({
     shadowOpacity: 0.4,
     backgroundColor: "#f64",
     borderRadius: 10,
-    margin: 10,
+    margin: 5,
     padding: 10,
+  },
+  recordButton: {
+    position: "absolute",
+    padding: 30,
+    borderRadius: 100,
+    backgroundColor: "white",
   },
   statusView: {
     paddingHorizontal: 30,

@@ -9,8 +9,8 @@ import BottomTabs from "./src/components/bottom-tabs/BottomTabs";
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <View>
+    <NavigationContainer theme={DarkTheme}>
+      <View style={{ height: "100%", width: "100%", backgroundColor: "black" }}>
         <TailwindProvider utilities={utilities}>
           <BottomTabs />
         </TailwindProvider>
