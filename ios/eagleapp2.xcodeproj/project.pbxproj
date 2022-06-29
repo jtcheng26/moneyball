@@ -24,6 +24,8 @@
 		00402D4C2868E2770044AA8A /* img_250.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 00402D462868E2760044AA8A /* img_250.jpg */; };
 		00402D4D2868E2770044AA8A /* img_251.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 00402D472868E2760044AA8A /* img_251.jpg */; };
 		00402D4F286A8E720044AA8A /* IMG_4537.JPG in Resources */ = {isa = PBXBuildFile; fileRef = 00402D4E286A8E700044AA8A /* IMG_4537.JPG */; };
+		00E107BE286BA479009D0CF0 /* hoops_final.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 00E107BD286BA479009D0CF0 /* hoops_final.tflite */; };
+		00E107C0286C8A23009D0CF0 /* hoops_final_544.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 00E107BF286C8A23009D0CF0 /* hoops_final_544.tflite */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
@@ -56,6 +58,8 @@
 		00402D472868E2760044AA8A /* img_251.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = img_251.jpg; sourceTree = "<group>"; };
 		00402D4E286A8E700044AA8A /* IMG_4537.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = IMG_4537.JPG; sourceTree = "<group>"; };
 		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
+		00E107BD286BA479009D0CF0 /* hoops_final.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = hoops_final.tflite; sourceTree = "<group>"; };
+		00E107BF286C8A23009D0CF0 /* hoops_final_544.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = hoops_final_544.tflite; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* eagleapp2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = eagleapp2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = eagleapp2/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = eagleapp2/AppDelegate.m; sourceTree = "<group>"; };
@@ -125,9 +129,11 @@
 				00402D342868ADEC0044AA8A /* BridgingHeader.h */,
 				00402D312868AD9F0044AA8A /* OpenCVWrapper.h */,
 				00402D322868AD9F0044AA8A /* OpenCVWrapper.mm */,
+				00E107BD286BA479009D0CF0 /* hoops_final.tflite */,
 				00402D212867641A0044AA8A /* yolov4-416-tiny.tflite */,
 				00402D1F28663BBE0044AA8A /* YoloFrameProcessor.m */,
 				00402D1C28663B390044AA8A /* YoloFrameProcessor.swift */,
+				00E107BF286C8A23009D0CF0 /* hoops_final_544.tflite */,
 				00402D4E286A8E700044AA8A /* IMG_4537.JPG */,
 				00402D452868E2760044AA8A /* img_249.jpg */,
 				00402D462868E2760044AA8A /* img_250.jpg */,
@@ -242,6 +248,7 @@
 				00402D412868BABD0044AA8A /* img_214.jpg in Resources */,
 				00402D3C2868BABD0044AA8A /* img_211.jpg in Resources */,
 				00402D4F286A8E720044AA8A /* IMG_4537.JPG in Resources */,
+				00E107BE286BA479009D0CF0 /* hoops_final.tflite in Resources */,
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				00402D4B2868E2770044AA8A /* img_249.jpg in Resources */,
 				00402D482868E2770044AA8A /* img_252.jpg in Resources */,
@@ -252,6 +259,7 @@
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 				00402D3D2868BABD0044AA8A /* img_215.jpg in Resources */,
 				00402D402868BABD0044AA8A /* img_217.jpg in Resources */,
+				00E107C0286C8A23009D0CF0 /* hoops_final_544.tflite in Resources */,
 				00402D3F2868BABD0044AA8A /* img_212.jpg in Resources */,
 				00402D4C2868E2770044AA8A /* img_250.jpg in Resources */,
 				00402D222867641A0044AA8A /* yolov4-416-tiny.tflite in Resources */,

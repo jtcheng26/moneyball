@@ -239,6 +239,14 @@ static int shotState = NO_MOTION; // global shot state, either IN_MOTION, NO_MOT
 + (cv::Mat *)prepareFrame:(UIImage *)frame {
   cv::Mat *currFrame = new cv::Mat;
   UIImageToMat(frame, *currFrame, true);
+  // rotations
+  if (frame.imageOrientation == UIImageOrientationRight) {
+    cv::rotate(*currFrame, *currFrame, cv::ROTATE_90_CLOCKWISE);
+  } else if (frame.imageOrientation == UIImageOrientationLeft) {
+    cv::rotate(*currFrame, *currFrame, cv::ROTATE_90_COUNTERCLOCKWISE);
+  } else if (frame.imageOrientation == UIImageOrientationDown) {
+    cv::rotate(*currFrame, *currFrame, cv::ROTATE_180);
+  };
   (*currFrame)(cv::Rect(bgLoc[0], bgLoc[1], bgLoc[2], bgLoc[3])).copyTo(*currFrame);
   
   currFrame = [self greyFilter: currFrame];

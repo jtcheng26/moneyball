@@ -114,9 +114,9 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
     }
   }
   
-  public static func interpretOutput(boxesXYWH: Tensor, scoresData: Tensor) -> (Array<Float32>, Array<Float32>, Array<Int>, Int) {
+  public static func interpretOutput(boxesXYWH: Tensor, scoresData: Tensor,side:Int) -> (Array<Float32>, Array<Float32>, Array<Int>, Int) {
     let boxesBuffer = UnsafeMutableBufferPointer<Float32>.allocate(capacity: 10140)
-    let scoresBuffer = UnsafeMutableBufferPointer<Float32>.allocate(capacity: 5070)
+    let scoresBuffer = UnsafeMutableBufferPointer<Float32>.allocate(capacity: 2535)
 
     boxesXYWH.data.copyBytes(to:boxesBuffer)
     scoresData.data.copyBytes(to:scoresBuffer)
@@ -125,9 +125,9 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
     let scoresUnfiltered = Array(scoresBuffer)
     
     var filteredIndices: Array<Int> = []
-    let SCORE_THRESHOLD = Float32(0.5)
-    for i in 0 ..< scoresUnfiltered.count/2 {
-      if scoresUnfiltered[2*i] > SCORE_THRESHOLD || scoresUnfiltered[2*i+1] > SCORE_THRESHOLD {
+    let SCORE_THRESHOLD = Float32(0.7)
+    for i in 0 ..< scoresUnfiltered.count {
+      if scoresUnfiltered[i] > SCORE_THRESHOLD {
         filteredIndices.append(i)
       }
     }
@@ -135,32 +135,23 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
     var boxes: Array<Float32> = []
     var scores: Array<Float32> = []
     var classes: Array<Int> = []
-    let numDetections = filteredIndices.count
+    var numDetections = 0
     
     print(filteredIndices)
     
     for i in filteredIndices {
-      let x = boxesUnfiltered[4 * i] / 416
-      let y = boxesUnfiltered[4 * i+1] / 416
-      let w = boxesUnfiltered[4 * i+2] / 416
-      let h = boxesUnfiltered[4 * i+3] / 416
+      let w = boxesUnfiltered[4 * i+2] / 416 / 2
+      let h = boxesUnfiltered[4 * i+3] / 416 / 2
+      let x = side == 0 ? boxesUnfiltered[4 * i] / 416 / 2 : 0.5 + (boxesUnfiltered[4*i] / 416 / 2)
+      let y = boxesUnfiltered[4 * i+1] / 416 / 2
       
-//      boxes.append(x-w/2) // left
-//      boxes.append(y-h/2) // top
-//      boxes.append(x+w/2) // right
-//      boxes.append(y+h/2) // bottom
-      boxes.append(x)
-      boxes.append(y)
-      boxes.append(w)
-      boxes.append(h)
-      
-      // only 2 classes
-      if scoresUnfiltered[2 * i] > scoresUnfiltered[2 * i+1] {
-        scores.append(scoresUnfiltered[2 * i])
-        classes.append(2 * i % 2)
-      } else {
-        scores.append(scoresUnfiltered[2 * i+1])
-        classes.append((2 * i+1) % 2)
+      // camera should not be that close to the basket
+      if w < 0.26 && h < 0.26 && (boxes.count < 4 || scoresUnfiltered[i] > scores[0]) {
+        numDetections += 1
+        boxes = [x, y, w, h]
+        // only 1 class
+        scores = [scoresUnfiltered[i]]
+        classes = [0]
       }
     }
     
@@ -168,40 +159,69 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
   }
   
   @objc
-  public static func detect(ciImage: CIImage) -> Array<Float32>? {
-    initDetector(fileName: "yolov4-416-tiny", fileExt: "tflite")
+  public static func detect(ciImage: CIImage, width: Int, height: Int, orientation: UIImage.Orientation) -> Array<Float32>? {
+    initDetector(fileName: "hoops_final", fileExt: "tflite")
 
     // preprocess
-    let resizedCIImage = resize(sourceImage: ciImage)
-    let inputData = prepareInput(ciImage: resizedCIImage)
+    var rawBoxes: Array<Array<Float32> > = []
+    var rawScores: Array<Array<Float32> > = []
+    var rawClasses: Array<Array<Float32> > = []
+    var rawNumDetections: Array<Float32> = []
+    
+    for i in 0..<2 {
+      let w = orientation == UIImage.Orientation.up ? width : height
+      let h = orientation == UIImage.Orientation.up ? height: width
+      var cropped: CIImage
+      if i == 0 {
+        cropped = ciImage.cropped(to: CGRect(x:0, y:h/2, width:w / 2, height:h / 2))
+      } else {
+        // TODO: figure out orientation
+        cropped = ciImage.cropped(to:CGRect(x:w/2,y:h/2,width:w/2,height:h/2))
+      }
+      let resizedCIImage = resize(sourceImage: cropped)
+      let inputData = prepareInput(ciImage: resizedCIImage)
 
-    do {
-      // run
-      try YoloFrameProcessor.detector?.copy(inputData, toInputAt:0)
-      try YoloFrameProcessor.detector?.invoke()
+      do {
+        // run
+        try YoloFrameProcessor.detector?.copy(inputData, toInputAt:0)
+        try YoloFrameProcessor.detector?.invoke()
 
-      let outputBoxes = try YoloFrameProcessor.detector?.output(at:0)
-      let outputPreds = try YoloFrameProcessor.detector?.output(at:1)
+        let outputBoxes = try YoloFrameProcessor.detector?.output(at:0)
+        let outputPreds = try YoloFrameProcessor.detector?.output(at:1)
 
-      // postprocess
-      let (boxes, scores, classes, numDetections) = interpretOutput(boxesXYWH: outputBoxes!, scoresData: outputPreds!)
-//
-//      print(boxes)
-//      print(scores)
-//      print(classes)
-//      print(numDetections)
+        // postprocess
+        let (boxes, scores, classes, numDetections) = interpretOutput(boxesXYWH: outputBoxes!, scoresData: outputPreds!, side:i)
+  //
+        print("detections", i)
+        print(boxes)
+  //      print(scores)
+  //      print(classes)
+  //      print(numDetections)
 
-      // format output
-      var output: Array<Float32> = []
-      output.append(Float32(numDetections))
-      output += boxes + scores
-      output += classes.map({ Float32($0) })
+        // format output
+//        var output: Array<Float32> = []
+        if (boxes.count > 0) {
+          rawNumDetections += [Float32(numDetections)]
+  //        output.append(Float32(numDetections))
+          rawBoxes.append(boxes)
+          rawScores.append(scores)
+          rawClasses.append(classes.map({ Float32($0) }))
+        }
+//        output += boxes + scores
+//        output += classes.map({ Float32($0) })
 
-      return output
-    } catch let error {
-      print("Failed to run interpreter with error: \(error.localizedDescription)")
-      return nil
+//        return output
+      } catch let error {
+        print("Failed to run interpreter with error: \(error.localizedDescription)")
+        return nil
+      }
     }
+    if (rawScores.count > 1 && rawBoxes[0][2] * rawBoxes[0][3] < rawBoxes[1][2] * rawBoxes[1][3]) {
+      return [rawNumDetections[1]] + rawBoxes[1] + rawScores[1] + rawClasses[1]
+    } else if (rawScores.count == 1) {
+      return [rawNumDetections[0]] + rawBoxes[0] + rawScores[0] + rawClasses[0]
+    }
+    return [0]
   }
 
   public static func loadImageFromBundle(fileName: String, fileExt: String) -> UIImage? {
@@ -224,7 +244,7 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
    
 //   let ciImage = CIImage(cvPixelBuffer: imageBuffer)
    let uiImage = UIImage(pixelBuffer: imageBuffer)!
-   YoloFrameProcessor.written += 1
+//   YoloFrameProcessor.written += 1
 //   print(uiImage.cgImage?.colorSpace?.name)
 //   print(uiImage.cgImage?.bitmapInfo.rawValue)
 //   print(uiImage.cgImage?.alphaInfo.rawValue)
@@ -232,18 +252,48 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
 //   print(uiImage.cgImage?.bytesPerRow.description)
 //   UIImageWriteToSavedPhotosAlbum(uiImage, nil, nil, nil);
    
+//   let ciiImage = CIImage(cgImage: uiImage.cgImage!)
+//   let cp = ciiImage.cropped(to: CGRect(x:0, y:0, width:Int(uiImage.size.width / 2), height:Int(uiImage.size.height / 2)))
+//   let cp2 = ciiImage.cropped(to:CGRect(x:Int(uiImage.size.width/2),y:0,width:Int(uiImage.size.width/2),height:Int(uiImage.size.height/2)))
+//   let context = CIContext()
+//   let cgImage = context.createCGImage(cp, from: cp.extent)!
+//   UIImageWriteToSavedPhotosAlbum(UIImage(cgImage: cgImage), nil, nil, nil)
+//   let context2 = CIContext()
+//   let cgImage2 = context2.createCGImage(cp2, from: cp2.extent)!
+//   UIImageWriteToSavedPhotosAlbum(UIImage(cgImage: cgImage2), nil, nil, nil)
+   
    var detectionResult: Array<Float> = []
    
    if args.count == 1 && args[0] as! Bool == true {
-     detectionResult = [0.0] + (OpenCVWrapper.updateBackground(uiImage, leftArg: 400, topArg: 400, rightArg: 600, bottomArg: 600) as! Array<Float>);
-//     if YoloFrameProcessor.written == 100 {
-//       let testUIImage = OpenCVWrapper.testFunc2();
-//       UIImageWriteToSavedPhotosAlbum(testUIImage, nil, nil, nil);
-//       YoloFrameProcessor.written += 1
-//     } else if (YoloFrameProcessor.written < 100) {
-//       YoloFrameProcessor.written += 1
-//     }
-     gaming = true;
+     if YoloFrameProcessor.written >= 10 {
+       let ciImage = CIImage(cgImage: uiImage.cgImage!)
+//       let cp = ciImage.cropped(to: CGRect(x:0, y:0, width:Int(uiImage.size.width / 2), height:Int(uiImage.size.height / 2)))
+//       let cp2 = ciImage.cropped(to:CGRect(x:Int(uiImage.size.width/2),y:0,width:Int(uiImage.size.width/2),height:Int(uiImage.size.height/2)))
+//       UIImageWriteToSavedPhotosAlbum(UIImage(ciImage: cp), nil, nil, nil)
+//       UIImageWriteToSavedPhotosAlbum(UIImage(ciImage: cp2), nil, nil, nil)
+       let hoops = YoloFrameProcessor.detect(ciImage:ciImage, width:Int(uiImage.size.width), height:Int(uiImage.size.height),orientation: uiImage.imageOrientation)!
+  //     print(hoops)
+       if hoops[0] > 0 {
+         let portrait = uiImage.imageOrientation == UIImage.Orientation.up
+         let fw = portrait ? Float32(uiImage.size.width) : Float32(uiImage.size.height)
+         let fh = portrait ? Float32(uiImage.size.height) : Float32(uiImage.size.width)
+         let w = hoops[3] * fw
+         let h = hoops[4] * fh
+         let l = hoops[1] * fw - w / 2 // top-left instead of center
+         let t = hoops[2] * fh - h / 2 // ditto
+         let r = l + w
+         let b = t + h
+         detectionResult = [0.0] + (OpenCVWrapper.updateBackground(uiImage, leftArg: Int32(l), topArg: Int32(t), rightArg: Int32(r), bottomArg: Int32(b)) as! Array<Float>);
+         let testUIImage = OpenCVWrapper.testFunc2();
+         UIImageWriteToSavedPhotosAlbum(testUIImage, nil, nil, nil);
+         gaming = true
+       } else {
+         detectionResult = [0]
+       }
+       YoloFrameProcessor.written = 0
+     } else {
+       YoloFrameProcessor.written += 1
+     }
    } else if (YoloFrameProcessor.gaming) {
      detectionResult = OpenCVWrapper.processFrame(uiImage) as! Array<Float> + detectionResult;
 //     if (YoloFrameProcessor.written % 5 == 0) {
@@ -268,6 +318,8 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
 //       let testUIImage4 = OpenCVWrapper.testFunc4(loadImageFromBundle(fileName: "IMG_4537", fileExt: "JPG")!)
 //       UIImageWriteToSavedPhotosAlbum(testUIImage4, nil, nil, nil)
 //     }
+   } else {
+     detectionResult = [0]
    }
 
 //   if (!YoloFrameProcessor.written) {

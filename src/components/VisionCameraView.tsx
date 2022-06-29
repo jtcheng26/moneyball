@@ -20,6 +20,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Svg, Rect, Circle } from "react-native-svg";
 import { ReText } from "react-native-redash";
+import { useOrientation } from "../hooks/useOrientation";
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -38,11 +39,14 @@ interface HoopDetection {
   };
 }
 
-const windowWidth = Dimensions.get("window").width;
-const windowHeight = Dimensions.get("window").height;
+let windowWidth = Dimensions.get("window").width;
+let windowHeight = Dimensions.get("window").height;
 
-console.log(windowWidth);
-console.log(windowHeight);
+if (windowHeight < windowWidth) {
+  const temp = windowWidth;
+  windowWidth = windowHeight;
+  windowHeight = temp;
+}
 
 interface BallDetection {
   box: {
@@ -60,6 +64,16 @@ interface VisionCameraViewProps {
 export default function VisionCameraView({ close }: VisionCameraViewProps) {
   const tailwind = useTailwind();
   const cam = useCameraDevices("wide-angle-camera");
+  const orientation = useOrientation();
+  // useEffect(() => {
+  //   if (orientation === "PORTRAIT") {
+  //     windowWidth = Dimensions.get("window").width;
+  //     windowHeight = Dimensions.get("window").height;
+  //   } else {
+  //     windowWidth = Dimensions.get("window").height;
+  //     windowHeight = Dimensions.get("window").width;
+  //   }
+  // });
   const [device, setDevice] = useState<CameraDevice | undefined>();
   const back = useMemo(() => {
     if (cam) return cam.back;
@@ -75,6 +89,7 @@ export default function VisionCameraView({ close }: VisionCameraViewProps) {
   const updateHoop = useSharedValue(true);
   const shotState = useSharedValue("");
   const noShotFrames = useSharedValue(0);
+  const detectedHoop = useSharedValue(false);
 
   const shotStateContainerStyles = useAnimatedStyle(() => {
     return {
@@ -155,6 +170,7 @@ export default function VisionCameraView({ close }: VisionCameraViewProps) {
           height: b - t,
         },
       };
+      detectedHoop.value = true;
     } else if (detectionsRes.length >= 4) {
       ballDetection.value = {
         box: {
@@ -195,7 +211,23 @@ export default function VisionCameraView({ close }: VisionCameraViewProps) {
     <View>
       {device ? (
         <>
-          <View style={cameraStyles.cameraContainer}>
+          <View
+            style={[
+              cameraStyles.cameraContainer,
+              {
+                height:
+                  orientation === "PORTRAIT"
+                    ? (windowWidth * 1920) / 1080
+                    : "100%",
+                width:
+                  orientation === "PORTRAIT"
+                    ? "100%"
+                    : (windowWidth * 1920) / 1080,
+                marginTop: orientation === "PORTRAIT" ? 50 : 0,
+                marginLeft: orientation === "LANDSCAPE" ? 50 : 0,
+              },
+            ]}
+          >
             <Camera
               style={cameraStyles.camera}
               device={device}
@@ -203,7 +235,21 @@ export default function VisionCameraView({ close }: VisionCameraViewProps) {
               frameProcessor={frameProcessor}
               frameProcessorFps={30}
             >
-              <View style={cameraStyles.overlay}>
+              <View
+                style={[
+                  cameraStyles.overlay,
+                  {
+                    height:
+                      orientation === "PORTRAIT"
+                        ? (windowWidth * 1920) / 1080
+                        : "100%",
+                    width:
+                      orientation === "PORTRAIT"
+                        ? "100%"
+                        : (windowWidth * 1920) / 1080,
+                  },
+                ]}
+              >
                 <Svg style={StyleSheet.absoluteFill} viewBox="0 0 1080 1920">
                   <AnimatedRect animatedProps={rectProps} />
                   <AnimatedCircle animatedProps={ballProps} />
@@ -215,14 +261,16 @@ export default function VisionCameraView({ close }: VisionCameraViewProps) {
                     text={shotState}
                     style={{
                       color: shotState.value === "Score" ? "#3f6" : "#c10",
-                      fontSize: 30,
+                      fontSize: 20,
                       fontWeight: "bold",
                     }}
                   />
                 </View>
                 <View style={cameraStyles.buttonView}>
                   <Pressable
-                    onPress={() => (updateHoop.value = false)}
+                    onPress={() => {
+                      if (detectedHoop) updateHoop.value = false;
+                    }}
                     style={cameraStyles.button}
                   >
                     <Text style={tailwind("text-xl text-white font-bold")}>
@@ -260,21 +308,20 @@ const cameraStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "black",
     borderRadius: 0,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   cameraContainer: {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    width: "100%",
-    height: (windowWidth * 1920) / 1080,
-    marginTop: 80,
     backgroundColor: "#fff",
   },
   overlay: {
     zIndex: 2,
     width: "100%",
-    height: "100%",
     backgroundColor: "transparent",
   },
   buttonView: {
@@ -299,8 +346,8 @@ const cameraStyles = StyleSheet.create({
     padding: 10,
   },
   statusView: {
-    paddingHorizontal: 50,
-    paddingVertical: 20,
+    paddingHorizontal: 30,
+    paddingVertical: 10,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgb(40, 40, 40)",
