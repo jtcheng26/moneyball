@@ -316,7 +316,9 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
      if detectionResult[0] == 1 {
        UIImageWriteToSavedPhotosAlbum(uiImage, nil, nil, nil);
        let testUIImage4 = OpenCVWrapper.testFunc4(uiImage);
+       let testUIImage3 = OpenCVWrapper.testFunc3(uiImage);
        UIImageWriteToSavedPhotosAlbum(testUIImage4, nil, nil, nil)
+       UIImageWriteToSavedPhotosAlbum(testUIImage3, nil, nil, nil)
      }
      
 //     if YoloFrameProcessor.written % 50 == 0 {

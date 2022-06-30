@@ -22,12 +22,9 @@ import Animated, {
   useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
-  withDecay,
-  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { Svg, Rect, Circle } from "react-native-svg";
-import { ReText } from "react-native-redash";
 import { useOrientation } from "../../hooks/useOrientation";
 import { FRAME_HEIGHT, FRAME_WIDTH } from "./constants";
 import type { HoopDetection, BallDetection } from "./VisionCameraView.types";
@@ -36,6 +33,7 @@ import { useNavigation } from "@react-navigation/native";
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const AnimatedButton = Animated.createAnimatedComponent(Pressable);
 
 let windowWidth = Dimensions.get("window").width;
 let windowHeight = Dimensions.get("window").height;
@@ -45,13 +43,6 @@ if (windowHeight < windowWidth) {
   windowWidth = windowHeight;
   windowHeight = temp;
 }
-
-// function getMaxFps(format: CameraDeviceFormat): number {
-//   return format.frameRateRanges.reduce((prev, curr) => {
-//     if (curr.maxFrameRate > prev) return curr.maxFrameRate;
-//     else return prev;
-//   }, 0);
-// }
 
 export const sortFormatsByResolution = (
   left: CameraDeviceFormat,
@@ -74,15 +65,6 @@ export default function VisionCameraView() {
   const tailwind = useTailwind();
   const cam = useCameraDevices("wide-angle-camera");
   const orientation = useOrientation();
-  // useEffect(() => {
-  //   if (orientation === "PORTRAIT") {
-  //     windowWidth = Dimensions.get("window").width;
-  //     windowHeight = Dimensions.get("window").height;
-  //   } else {
-  //     windowWidth = Dimensions.get("window").height;
-  //     windowHeight = Dimensions.get("window").width;
-  //   }
-  // });
   const [device, setDevice] = useState<CameraDevice | undefined>();
   const formats = useMemo(
     () => device?.formats.sort(sortFormatsByResolution),
@@ -94,6 +76,8 @@ export default function VisionCameraView() {
   const front = useMemo(() => {
     if (cam) return cam.front;
   }, [cam]);
+  const [active, setActive] = useState(true);
+  const navigation = useNavigation();
   useEffect(() => {
     if (cam && !device) setDevice(back);
   });
@@ -104,9 +88,13 @@ export default function VisionCameraView() {
   const noShotFrames = useSharedValue(0);
   const detectedHoop = useSharedValue(false);
 
-  const shotStateContainerStyles = useAnimatedStyle(() => {
+  const recordingStyles = useAnimatedStyle(() => {
     return {
-      display: shotState.value === "" ? "none" : "flex",
+      borderColor: !updateHoop.value ? "red" : "white",
+      position: "absolute",
+      padding: 30,
+      borderRadius: 100,
+      borderWidth: 10,
     };
   });
 
@@ -220,10 +208,6 @@ export default function VisionCameraView() {
     console.log(Date.now() - st);
   }, []);
 
-  const [active, setActive] = useState(true);
-
-  const navigation = useNavigation();
-
   useEffect(() => {
     const onBlur = navigation.addListener("blur", () => {
       setActive(false);
@@ -272,8 +256,6 @@ export default function VisionCameraView() {
                     orientation === "PORTRAIT"
                       ? "100%"
                       : (windowWidth * FRAME_HEIGHT) / FRAME_WIDTH,
-                  // marginTop: orientation === "PORTRAIT" ? 50 : 0,
-                  // marginLeft: orientation === "LANDSCAPE" ? 50 : 0,
                   backgroundColor: "black",
                 },
               ]}
@@ -313,49 +295,18 @@ export default function VisionCameraView() {
                     <AnimatedRect animatedProps={rectProps} />
                     <AnimatedCircle animatedProps={ballProps} />
                   </Svg>
-                  {/* <View
-                  style={[shotStateContainerStyles, cameraStyles.statusView]}
-                >
-                  <ReText
-                    text={shotState}
-                    style={{
-                      color: shotState.value === "Score" ? "#3f6" : "#c10",
-                      fontSize: 20,
-                      fontWeight: "bold",
-                    }}
-                  />
-                </View> */}
-                  {/* <Pressable
-                    onPress={flipCamera}
-                    style={{
-                      position: "absolute",
-                      right: 0,
-                    }}
-                  >
-                    <Text style={tailwind("text-xl text-white font-bold")}>
-                      Flip
-                    </Text>
-                  </Pressable> */}
-                  {/* <View style={cameraStyles.buttonView}> */}
-                  <Pressable
+                  <AnimatedButton
                     onPress={() => {
-                      if (detectedHoop) updateHoop.value = false;
+                      if (detectedHoop) updateHoop.value = !updateHoop.value;
                     }}
                     style={[
-                      cameraStyles.recordButton,
+                      recordingStyles,
                       {
-                        borderColor: "red",
-                        borderWidth: !updateHoop ? 5 : 0,
                         right: orientation === "LANDSCAPE" ? 20 : "auto",
                         bottom: orientation === "PORTRAIT" ? 20 : "auto",
                       },
                     ]}
-                  >
-                    {/* <Text style={tailwind("text-xl text-white font-bold")}>
-                        
-                      </Text> */}
-                  </Pressable>
-                  {/* </View> */}
+                  />
                 </View>
               </Camera>
             </View>
@@ -387,7 +338,6 @@ const barStyles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     padding: 10,
-    // backgroundColor: "white",
   },
 });
 
@@ -445,7 +395,7 @@ const cameraStyles = StyleSheet.create({
     position: "absolute",
     padding: 30,
     borderRadius: 100,
-    backgroundColor: "white",
+    borderWidth: 10,
   },
   statusView: {
     paddingHorizontal: 30,

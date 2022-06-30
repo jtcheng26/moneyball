@@ -52,62 +52,72 @@ static int shotState = NO_MOTION; // global shot state, either IN_MOTION, NO_MOT
   // NO_MOTION indicates the shot is neither a make nor miss
   // a make or miss is returned once per shot attempt and resets once the ball leaves the frame
   int state = NO_MOTION;
+  double movementAmt = cv::sum(*currFrame)[0];
+  double movementThresh = (255 / 4 * (currFrame->cols) * (currFrame->rows));
+  std::cout << movementAmt << " should be less than " << movementThresh << "\n";
   
-  std::vector<cv::Vec3f> circles = [self extractCircles: currFrame];
-  
-  if (!circles.empty()) {
-    cv::Vec3f nowBall = circles[0];
-    double best = 0;
-    int bigCircles = 0; // if too many circles are filled, assume interference and don't do anything, avoiding false positives
-    for (cv::Vec3f circ : circles) {
-      int left = std::max(0, int(circ[0]-circ[2]));
-      int top = std::max(0, int(circ[1]-circ[2]));
-      int width = std::max(0, std::min(currFrame->cols - left, int(2 * circ[2])));
-      int height = std::max(0, std::min(currFrame->rows - top, int(2 * circ[2])));
-      cv::Mat ballMat = (*currFrame)(cv::Rect(left, top, width, height));
-      double cnt = cv::sum(ballMat)[0] / (255 * circ[2] * circ[2] * 4); // overflow possible (?)
-      if (cnt > best) {
-        nowBall = circ;
-        best = cnt;
-      }
-      if (cnt > 0.7) {
-        bigCircles += 1;
-      }
-    }
-    if (bigCircles < 4 && best >= 0.5) {
-      ball = nowBall;
-      lastDetection = 0;
-      
-      if (shotState == IN_MOTION) {
-        // a little bit of padding
-        if (ball[CX] - ball[CR] >= hoopLoc[LEFT] - ball[CR] / 3 && ball[CX] + ball[CR] <= hoopLoc[RIGHT] + ball[CR] / 3 && ball[CY] >= hoopLoc[TOP] + ball[CR] / 3) {
-          shotState = state = MADE_SHOT;
+  if (movementAmt < movementThresh) {
+    std::vector<cv::Vec3f> circles = [self extractCircles: currFrame];
+    // do nothing if too much movement
+    if (!circles.empty()) {
+      cv::Vec3f nowBall = circles[0];
+      double best = 0;
+      int bigCircles = 0; // if too many circles are filled, assume interference and don't do anything, avoiding false positives
+      for (cv::Vec3f circ : circles) {
+        int left = std::max(0, int(circ[0]-circ[2]));
+        int top = std::max(0, int(circ[1]-circ[2]));
+        int width = std::max(0, std::min(currFrame->cols - left, int(2 * circ[2])));
+        int height = std::max(0, std::min(currFrame->rows - top, int(2 * circ[2])));
+        cv::Mat ballMat = (*currFrame)(cv::Rect(left, top, width, height));
+        double cnt = cv::sum(ballMat)[0] / (255 * circ[2] * circ[2] * 4); // overflow possible (?)
+        if (cnt > best) {
+          nowBall = circ;
+          best = cnt;
         }
-      } else if (shotState == NO_MOTION) {
-        shotState = IN_MOTION;
+        if (cnt > 0.7) {
+          bigCircles += 1;
+        }
+      }
+      if (bigCircles < 4 && best >= 0.5) {
+        ball = nowBall;
+        lastDetection = 0;
+        
+        if (shotState == IN_MOTION) {
+          // a little bit of padding
+          if (ball[CX] - ball[CR] >= hoopLoc[LEFT] - ball[CR] / 3 && ball[CX] + ball[CR] <= hoopLoc[RIGHT] + ball[CR] / 3 && ball[CY] >= hoopLoc[TOP] + ball[CR] / 3) {
+            shotState = state = MADE_SHOT;
+          }
+        } else if (shotState == NO_MOTION) {
+          shotState = IN_MOTION;
+        }
+      } else if (lastDetection >= 0) {
+        lastDetection += 1;
       }
     } else if (lastDetection >= 0) {
       lastDetection += 1;
     }
-  } else if (lastDetection >= 0) {
-    lastDetection += 1;
-  }
-  if (lastDetection > 0) {
-    if (lastDetection >= MISS_THRESHOLD && shotState == IN_MOTION) {
-      state = MISS_SHOT;
-      shotState = NO_MOTION;
-      // add padding after shot so its only counted once as it goes throught the net
-    } else if (lastDetection >= MISS_THRESHOLD && shotState == MADE_SHOT) {
-      shotState = NO_MOTION;
+    if (lastDetection > 0) {
+      if (lastDetection >= MISS_THRESHOLD && shotState == IN_MOTION) {
+        state = MISS_SHOT;
+        shotState = NO_MOTION;
+        // add padding after shot so its only counted once as it goes throught the net
+      } else if (lastDetection >= MISS_THRESHOLD && shotState == MADE_SHOT) {
+        shotState = NO_MOTION;
+      }
+      
+      if (lastDetection > MISS_THRESHOLD + UPDATE_BG_THRESHOLD) {
+        [self updateBackground:frame leftArg:bgLoc[0]+hoopLoc[0] topArg:bgLoc[1]+hoopLoc[1] rightArg:bgLoc[0]+hoopLoc[2] bottomArg:bgLoc[1]+hoopLoc[3]];
+        lastDetection = -1;
+      }
     }
-    
-    if (lastDetection > MISS_THRESHOLD + UPDATE_BG_THRESHOLD) {
-      [self updateBackground:frame leftArg:bgLoc[0]+hoopLoc[0] topArg:bgLoc[1]+hoopLoc[1] rightArg:bgLoc[0]+hoopLoc[2] bottomArg:bgLoc[1]+hoopLoc[3]];
-      lastDetection = -1;
-    }
+    delete currFrame;
+  } else {
+    delete currFrame;
+    return @[@0];
   }
+  
 
-  delete currFrame;
+  
   
   // convert to coordinates relative to entire frame
   return shotState == NO_MOTION ? @[@(state)] : @[@(state), @(bgLoc[0] + ball[CX]), @(bgLoc[1] + ball[CY]), @(ball[CR])];
@@ -358,14 +368,42 @@ static int shotState = NO_MOTION; // global shot state, either IN_MOTION, NO_MOT
 }
 
 + (UIImage *)testFunc3:(UIImage*)frame {
-  cv::Mat *currFrame = new cv::Mat;
-  UIImageToMat(frame, *currFrame, true);
-  (*currFrame)(cv::Rect(bgLoc[0], bgLoc[1], bgLoc[2], bgLoc[3])).copyTo(*currFrame);
-  currFrame = [self greyFilter: currFrame];
-  currFrame = [self gaussFilter: currFrame];
+  // frame shot state, either MADE_SHOT, MISS_SHOT, or NO_MOTION
+  // NO_MOTION indicates the shot is neither a make nor miss
+  // a make or miss is returned once per shot attempt and resets once the ball leaves the frame
+//  cv::Mat *currFrame = [self prepareFrame: frame];
+  cv::Mat *currFrame = [self prepareFrame: frame];
+  std::vector<cv::Vec3f> circles = [self extractCircles: currFrame];
+//  cv::Mat cannyfied;
+//  cv::Canny(*currFrame, cannyfied, 5, 70, 3);
+  
+  // frame shot state, either MADE_SHOT, MISS_SHOT, or NO_MOTION
+  // NO_MOTION indicates the shot is neither a make nor miss
+  // a make or miss is returned once per shot attempt and resets once the ball leaves the frame
+  int state = NO_MOTION;
   cv::Mat retFrame;
   cv::cvtColor(*currFrame, retFrame, cv::COLOR_GRAY2RGB);
-  cv::circle(retFrame, cv::Point(ball[0], ball[1]), ball[2], cv::Scalar(255, 136, 0), 4);
+  
+  if (!circles.empty()) {
+    cv::Vec3f nowBall = circles[0];
+    double best = 0;
+    for (cv::Vec3f circ : circles) {
+      cv::circle(retFrame, cv::Point(circ[0], circ[1]), circ[2], cv::Scalar(255, 136, 0), 4);
+      // A basketball should be roughly 1/2 the size of the rim (9.5 inches vs 18 inches)
+      int left = std::max(0, int(circ[0]-circ[2]));
+      int top = std::max(0, int(circ[1]-circ[2]));
+      int width = std::min(currFrame->cols - left, int(2 * circ[2]));
+      int height = std::min(currFrame->rows - top, int(2 * circ[2]));
+      cv::Mat ballMat = (*currFrame)(cv::Rect(left, top, width, height));
+      double cnt = cv::sum(ballMat)[0];
+      if (cnt > best) {
+        nowBall = circ;
+        best = cnt;
+      }
+    }
+  }
+  
+  cv::circle(retFrame, cv::Point(ball[0], ball[1]), ball[2], cv::Scalar(136, 244, 0), 4);
   cv::rectangle(retFrame, cv::Point(hoopLoc[0], hoopLoc[1]), cv::Point(hoopLoc[2], hoopLoc[3]), cv::Scalar(0, 136, 255), 4);
   
   delete currFrame;
