@@ -2,8 +2,20 @@
   position: absolute
 }
 
+.relative {
+  position: relative
+}
+
 .flex {
   display: flex
+}
+
+.\!flex {
+  display: flex !important
+}
+
+.hidden {
+  display: none
 }
 
 .h-full {
@@ -14,12 +26,26 @@
   width: 100%
 }
 
+.flex-row {
+  flex-direction: row
+}
+
 .items-center {
   align-items: center
 }
 
 .justify-center {
   justify-content: center
+}
+
+.bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity))
+}
+
+.px-8 {
+  padding-left: 2rem;
+  padding-right: 2rem
 }
 
 .text-xl {
@@ -34,4 +60,12 @@
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity))
+}
+
+.underline {
+  text-decoration-line: underline
+}
+
+.\!underline {
+  text-decoration-line: underline !important
 }

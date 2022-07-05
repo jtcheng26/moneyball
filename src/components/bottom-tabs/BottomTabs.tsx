@@ -4,6 +4,9 @@ import Home from "../../screens/Home";
 import VisionCameraView from "../camera-view/VisionCameraView";
 import { View } from "react-native";
 import TabBar from "./TabBar";
+import Logout from "../../screens/Logout";
+import Play from "../../screens/Play";
+import UILibrary1 from "../../test/UILibrary1";
 
 const Tab = createBottomTabNavigator();
 
@@ -31,6 +34,9 @@ export default function BottomTabs() {
         }}
       >
         <Tab.Screen name="Home" component={Home} />
+        <Tab.Screen name="Play" component={Play} />
+        <Tab.Screen name="UI" component={UILibrary1} />
+        <Tab.Screen name="Logout" component={Logout} />
         <Tab.Screen name="Cam" component={VisionCameraView} />
       </Tab.Navigator>
     </View>

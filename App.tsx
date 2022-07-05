@@ -1,18 +1,23 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import { TailwindProvider } from "tailwind-rn/dist";
-import Home from "./src/screens/Home";
 import utilities from "./tailwind.json";
 import { DarkTheme, NavigationContainer } from "@react-navigation/native";
-import Navigation from "./src/screens/Navigation";
-import BottomTabs from "./src/components/bottom-tabs/BottomTabs";
+import WalletConnectProvider from "@walletconnect/react-native-dapp";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Login from "./src/screens/Login";
 
 export default function App() {
   return (
     <NavigationContainer theme={DarkTheme}>
       <View style={{ height: "100%", width: "100%", backgroundColor: "black" }}>
         <TailwindProvider utilities={utilities}>
-          <BottomTabs />
+          <WalletConnectProvider
+            redirectUrl="/"
+            storageOptions={{ asyncStorage: AsyncStorage }}
+          >
+            <Login />
+          </WalletConnectProvider>
         </TailwindProvider>
       </View>
     </NavigationContainer>
