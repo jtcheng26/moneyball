@@ -4,8 +4,8 @@ import { ThemeColor } from "../../../theme";
 
 export interface ColorBoxProps {
   color: ThemeColor;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
   pressable?: boolean;
   onPress?: () => void;
   children?: React.ReactNode;
@@ -27,11 +27,11 @@ export default function ColorBox({
 }: ColorBoxProps) {
   const [pressed, setPressed] = useState(false);
   const dynamicStyles = {
-    height: height,
-    width: !flex ? width : "auto",
+    height: height || "auto",
+    width: !flex && width ? width : "auto",
     backgroundColor: pressed ? color.underline : color.color,
-    borderColor: color.underline,
-    borderBottomWidth: !underline ? 0 : height / 9,
+    borderBottomColor: color.underline,
+    borderBottomWidth: !underline ? 0 : (height ? height : 45) / 9,
     alignItems: leftAlign ? "flex-start" : "center",
     paddingHorizontal: leftAlign ? 10 : 0,
     paddingVertical: leftAlign ? 5 : 0,
@@ -42,11 +42,11 @@ export default function ColorBox({
       onPressIn={() => {
         if (pressable) {
           setPressed(true);
-          if (onPress) onPress();
         }
       }}
-      onPressOut={() => {
-        setPressed(false);
+      onPressOut={() => setPressed(false)}
+      onPress={() => {
+        if (onPress) onPress();
       }}
     >
       <View style={[dynamicStyles, styles.box]}>{children}</View>

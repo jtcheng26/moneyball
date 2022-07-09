@@ -34,7 +34,7 @@ static int hoopLoc[4] = {0, 0, 416, 416}; // left, top, right, bottom
 
 static cv::Vec3f ball = cv::Vec3f(0, 0, 1);
 static int lastDetection = -1; // # of frames since ball last detected
-static int MISS_THRESHOLD = 20; // # of frames to wait before declaring miss
+static int MISS_THRESHOLD = 30; // # of frames to wait before declaring miss
 static int UPDATE_BG_THRESHOLD = 50; // # of additional frames to wait before updating bg mat (to account for changes in lighting, noise, etc.)
 static int shotState = NO_MOTION; // global shot state, either IN_MOTION, NO_MOTION, or MADE_SHOT
 
@@ -50,15 +50,16 @@ static int shotState = NO_MOTION; // global shot state, either IN_MOTION, NO_MOT
   
   // frame shot state, either MADE_SHOT, MISS_SHOT, or NO_MOTION
   // NO_MOTION indicates the shot is neither a make nor miss
-  // a make or miss is returned once per shot attempt and resets once the ball leaves the frame
+  // a make or miss is returned once per shot attempt and resets once the ball leaves the frame for MISS_THRESHOLD frames
+  // background is updated after MISS_THRESHOLD + UPDATE_BG_THRESHOLD frames of no ball detection and a frame similar enough to the previous background (movementThresh)
   int state = NO_MOTION;
   double movementAmt = cv::sum(*currFrame)[0];
   double movementThresh = (255 / 4 * (currFrame->cols) * (currFrame->rows));
-  std::cout << movementAmt << " should be less than " << movementThresh << "\n";
+//  std::cout << movementAmt << " should be less than " << movementThresh << "\n";
   
+  // do nothing if too much movement
   if (movementAmt < movementThresh) {
     std::vector<cv::Vec3f> circles = [self extractCircles: currFrame];
-    // do nothing if too much movement
     if (!circles.empty()) {
       cv::Vec3f nowBall = circles[0];
       double best = 0;
@@ -84,7 +85,7 @@ static int shotState = NO_MOTION; // global shot state, either IN_MOTION, NO_MOT
         
         if (shotState == IN_MOTION) {
           // a little bit of padding
-          if (ball[CX] - ball[CR] >= hoopLoc[LEFT] - ball[CR] / 3 && ball[CX] + ball[CR] <= hoopLoc[RIGHT] + ball[CR] / 3 && ball[CY] >= hoopLoc[TOP] + ball[CR] / 3) {
+          if (ball[CX] - ball[CR] >= hoopLoc[LEFT] - ball[CR] / 3 && ball[CX] + ball[CR] <= hoopLoc[RIGHT] + ball[CR] / 3 && (ball[CY] - ball[CR]) >= hoopLoc[TOP] + (hoopLoc[BOTTOM] - hoopLoc[TOP]) / 4) {
             shotState = state = MADE_SHOT;
           }
         } else if (shotState == NO_MOTION) {
@@ -115,9 +116,6 @@ static int shotState = NO_MOTION; // global shot state, either IN_MOTION, NO_MOT
     delete currFrame;
     return @[@0];
   }
-  
-
-  
   
   // convert to coordinates relative to entire frame
   return shotState == NO_MOTION ? @[@(state)] : @[@(state), @(bgLoc[0] + ball[CX]), @(bgLoc[1] + ball[CY]), @(ball[CR])];
@@ -157,89 +155,8 @@ static int shotState = NO_MOTION; // global shot state, either IN_MOTION, NO_MOT
   cv::Canny(*image, cannyfied, 5, 70, 3);
   int minSize = (hoopLoc[2] - hoopLoc[0]) / 5; // too small might be bird
   int maxSize = (hoopLoc[2] - hoopLoc[0]) / 2 / 1.5; // too big impossible to go in
-//  int n = (hoopLoc[2] - hoopLoc[0]) / 2;
-//
-//  int heat = 0;
-//    std::pair<int, int> center = std::pair<int, int>(n / 2, n / 2); // x, y
-//    for (int i = 0; i < n; i++)
-//    {
-//      Pixel* ptr = image->ptr<Pixel>(i, 0);
-//      for (int j=0; j<n; j++) {
-//        heat += (++ptr)->x != 0;
-//      }
-//    }
-//    int best = heat;
-//    int r = 0;
-//    int c = 0;
-//    int d = 1;
-//    while (r < image->rows - n + 1)
-//    {
-//      int end = d == 1 ? image->cols - n : 0;
-//      while (c != end)
-//      {
-//        for (int i = r; i < r + n; i++)
-//        {
-//          if (d == 1)
-//          {
-//            heat -= image->at<cv::Vec3b>(i, c)[0] != 0;
-//            heat += image->at<cv::Vec3b>(i, c+n)[0] != 0;
-//          }
-//          else
-//          {
-//            heat -= image->at<cv::Vec3b>(i, c+n-1)[0] != 0;
-//            heat += image->at<cv::Vec3b>(i, c-1)[0] != 0;
-//          }
-//        }
-//        c += d;
-//        // cout << "-----------------------------------------------"
-//        //      << "\n";
-//        // cout << r << " " << c << "\n";
-//        // for (int i = r; i < r + n; i++)
-//        // {
-//        //   for (int j = c; j < c + n; j++)
-//        //   {
-//        //     cout << a[i][j] << " ";
-//        //   }
-//        //   cout << "\n";
-//        // }
-//        // cout << heat << "\n";
-//        if (heat > best)
-//        {
-//          best = heat;
-//          center.first = c + n / 2;  // x
-//          center.second = r + n / 2; // y
-//        }
-//      }
-//      if (r < image->rows - n)
-//      {
-//        d = d * -1;
-//        for (int i = c; i < c + n; i++)
-//        {
-//          heat -= image->at<cv::Vec3b>(r, i)[0] != 0;
-//          heat += image->at<cv::Vec3b>(r+n, i)[0] != 0;
-//        }
-//      }
-//      r++;
-//      // if (r < rows - n)
-//      // {
-//      //   cout << "-----------------------------------------------"
-//      //        << "\n";
-//      //   cout << r << " " << c << "\n";
-//      //   for (int i = r; i < r + n; i++)
-//      //   {
-//      //     for (int j = c; j < c + n; j++)
-//      //     {
-//      //       cout << a[i][j] << " ";
-//      //     }
-//      //     cout << "\n";
-//      //   }
-//      // }
-//    }
-//
-//  if (heat > (n * n) / 4) {
-//    circles.push_back(cv::Vec3f(center.first, center.second, n/2));
-//  }
-  HoughCircles(*image, circles, cv::HOUGH_GRADIENT, 2, (hoopLoc[2] - hoopLoc[0]) / 2,32, 34, minSize, maxSize);
+
+  HoughCircles(*image, circles, cv::HOUGH_GRADIENT, 2, (hoopLoc[2] - hoopLoc[0]) / 2,32, 36, minSize, maxSize);
   
   return circles;
 }

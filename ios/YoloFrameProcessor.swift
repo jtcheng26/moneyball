@@ -178,7 +178,6 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
       if i == 0 {
         cropped = ciImage.cropped(to: CGRect(x:0, y:h/2, width:w / 2, height:h / 2))
       } else {
-        // TODO: figure out orientation
         cropped = ciImage.cropped(to: CGRect(x:w/2,y:h/2,width:w/2,height:h/2))
       }
       let resizedCIImage = resize(sourceImage: cropped)
@@ -270,12 +269,8 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
    if args.count == 1 && args[0] as! Bool == true {
      print(uiImage.size.width)
      print(uiImage.size.height)
-     if YoloFrameProcessor.written >= 10 {
+//     if YoloFrameProcessor.written >= 10 {
        let ciImage = CIImage(cgImage: uiImage.cgImage!)
-//       let cp = ciImage.cropped(to: CGRect(x:0, y:0, width:Int(uiImage.size.width / 2), height:Int(uiImage.size.height / 2)))
-//       let cp2 = ciImage.cropped(to:CGRect(x:Int(uiImage.size.width/2),y:0,width:Int(uiImage.size.width/2),height:Int(uiImage.size.height/2)))
-//       UIImageWriteToSavedPhotosAlbum(UIImage(ciImage: cp), nil, nil, nil)
-//       UIImageWriteToSavedPhotosAlbum(UIImage(ciImage: cp2), nil, nil, nil)
        let hoops = YoloFrameProcessor.detect(ciImage:ciImage, width:Int(uiImage.size.width), height:Int(uiImage.size.height),orientation: uiImage.imageOrientation)!
   //     print(hoops)
        if hoops[0] > 0 {
@@ -289,16 +284,16 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
          let r = l + w
          let b = t + h
          detectionResult = [0.0] + (OpenCVWrapper.updateBackground(uiImage, leftArg: Int32(l), topArg: Int32(t), rightArg: Int32(r), bottomArg: Int32(b)) as! Array<Float>);
-         let testUIImage = OpenCVWrapper.testFunc2();
-         UIImageWriteToSavedPhotosAlbum(testUIImage, nil, nil, nil);
+//         let testUIImage = OpenCVWrapper.testFunc2();
+//         UIImageWriteToSavedPhotosAlbum(testUIImage, nil, nil, nil);
          gaming = true
        } else {
          detectionResult = [0]
        }
-       YoloFrameProcessor.written = 0
-     } else {
-       YoloFrameProcessor.written += 1
-     }
+//       YoloFrameProcessor.written = 0
+//     } else {
+//       YoloFrameProcessor.written += 1
+//     }
    } else if (YoloFrameProcessor.gaming) {
      detectionResult = OpenCVWrapper.processFrame(uiImage) as! Array<Float> + detectionResult;
 //     if (YoloFrameProcessor.written % 5 == 0) {
@@ -321,10 +316,6 @@ public class YoloFrameProcessor: NSObject, FrameProcessorPluginBase {
        UIImageWriteToSavedPhotosAlbum(testUIImage3, nil, nil, nil)
      }
      
-//     if YoloFrameProcessor.written % 50 == 0 {
-//       let testUIImage4 = OpenCVWrapper.testFunc4(loadImageFromBundle(fileName: "IMG_4537", fileExt: "JPG")!)
-//       UIImageWriteToSavedPhotosAlbum(testUIImage4, nil, nil, nil)
-//     }
    } else {
      detectionResult = [0]
    }

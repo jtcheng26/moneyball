@@ -62,19 +62,21 @@ export default function Scoreboard({
     },
   });
 
-  const dateString = timeLeft
-    ? `${Math.floor(timeLeft / 60)}:${
-        timeLeft % 60 < 10 ? "0" + (timeLeft % 60) : timeLeft % 60
-      }`
-    : "";
+  const dateString =
+    timeLeft || timeLeft === 0
+      ? `${Math.floor(timeLeft / 60)}:${
+          timeLeft % 60 < 10 ? "0" + (timeLeft % 60) : timeLeft % 60
+        }`
+      : "";
 
   return fontsLoaded ? (
     <Pressable
       onPressIn={() => {
-        if (pressable) {
-          setPress(true);
-          if (onPress) onPress();
-        }
+        console.log("press");
+        if (pressable) setPress(true);
+      }}
+      onPress={() => {
+        if (onPress) onPress();
       }}
       onPressOut={() => setPress(false)}
     >
@@ -103,8 +105,9 @@ export default function Scoreboard({
             </>
           ) : (
             <LabelText
+              flex
               size={20}
-              text={dateString}
+              text={title.toUpperCase()}
               color={active ? THEME_COLORS.theme[50] : THEME_COLORS.dark[200]}
             />
           )}
@@ -113,7 +116,7 @@ export default function Scoreboard({
           <BoxScore
             underline={underline}
             color={THEME_COLORS.red[500]}
-            value={scores[0]}
+            value={scores[1]}
             width={height || 70}
             height={height || 70}
           />

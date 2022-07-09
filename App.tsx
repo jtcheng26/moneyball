@@ -6,11 +6,18 @@ import { DarkTheme, NavigationContainer } from "@react-navigation/native";
 import WalletConnectProvider from "@walletconnect/react-native-dapp";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Login from "./src/screens/Login";
+import { THEME_COLORS } from "./src/theme";
 
 export default function App() {
   return (
     <NavigationContainer theme={DarkTheme}>
-      <View style={{ height: "100%", width: "100%", backgroundColor: "black" }}>
+      <View
+        style={{
+          height: "100%",
+          width: "100%",
+          backgroundColor: THEME_COLORS.dark[800].color,
+        }}
+      >
         <TailwindProvider utilities={utilities}>
           <WalletConnectProvider
             redirectUrl="/"

@@ -14,10 +14,6 @@
   display: flex !important
 }
 
-.hidden {
-  display: none
-}
-
 .h-full {
   height: 100%
 }
@@ -26,8 +22,8 @@
   width: 100%
 }
 
-.flex-row {
-  flex-direction: row
+.flex-col {
+  flex-direction: column
 }
 
 .items-center {
@@ -46,6 +42,15 @@
 .px-8 {
   padding-left: 2rem;
   padding-right: 2rem
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem
+}
+
+.pt-2 {
+  padding-top: 0.5rem
 }
 
 .text-xl {

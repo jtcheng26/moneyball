@@ -1,18 +1,22 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../../screens/Home";
-import VisionCameraView from "../camera-view/VisionCameraView";
 import { View } from "react-native";
 import TabBar from "./TabBar";
 import Logout from "../../screens/Logout";
 import Play from "../../screens/Play";
 import UILibrary1 from "../../test/UILibrary1";
+import UILibrary2 from "../../test/UILibrary2";
+import { THEME_COLORS } from "../../theme";
+import SessionEnd from "../../test/SessionEnd";
 
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabs() {
   return (
-    <View style={{ height: "100%" }}>
+    <View
+      style={{ height: "100%", backgroundColor: THEME_COLORS.dark[800].color }}
+    >
       <Tab.Navigator
         tabBar={TabBar}
         screenOptions={{
@@ -20,7 +24,7 @@ export default function BottomTabs() {
           tabBarStyle: {
             paddingBottom: 30,
             paddingTop: 0,
-            backgroundColor: "black",
+            backgroundColor: THEME_COLORS.dark[500].color,
             borderTopWidth: 0,
             // borderRadius: 300,
             marginBottom: 10,
@@ -36,8 +40,9 @@ export default function BottomTabs() {
         <Tab.Screen name="Home" component={Home} />
         <Tab.Screen name="Play" component={Play} />
         <Tab.Screen name="UI" component={UILibrary1} />
+        <Tab.Screen name="UI2" component={UILibrary2} />
+        <Tab.Screen name="A" component={SessionEnd} />
         <Tab.Screen name="Logout" component={Logout} />
-        <Tab.Screen name="Cam" component={VisionCameraView} />
       </Tab.Navigator>
     </View>
   );
