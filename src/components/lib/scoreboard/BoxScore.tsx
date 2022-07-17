@@ -9,6 +9,7 @@ interface BoxScoreProps {
   underline?: boolean;
   width: number;
   height: number;
+  size?: number;
 }
 
 export default function BoxScore({
@@ -17,10 +18,11 @@ export default function BoxScore({
   underline,
   width,
   height,
+  size,
 }: BoxScoreProps) {
   return (
     <ColorBox underline={underline} color={color} width={width} height={height}>
-      <LabelText color={THEME_COLORS.dark[0]} text={value} size={40} />
+      <LabelText color={THEME_COLORS.dark[0]} text={value} size={size || 40} />
     </ColorBox>
   );
 }

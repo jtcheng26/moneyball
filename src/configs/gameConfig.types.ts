@@ -1,10 +1,15 @@
 import { GameControllerProps } from "../components/game-controllers/SoloPracticeController";
+import { GameCode } from "../data/data.types";
 import { ThemeColor } from "../theme";
+import { HorseMatchConfig } from "./horseMatchConfig";
+import { RankedMatchConfig } from "./rankedMatchConfig";
+import { SoloPigConfig } from "./soloPigConfig";
+import { SoloPracticeConfig } from "./soloPracticeConfig";
 
 export interface GameConfig {
   name: string;
   description: string;
-  id: string; // unique mode identifier for server/blockchain
+  id: GameCode; // unique mode identifier for server/blockchain
   color: ThemeColor;
   icon: string; // name of svg
   entryFee: number; // in tickets
@@ -13,3 +18,10 @@ export interface GameConfig {
   controller: (props: GameControllerProps) => JSX.Element; // React element that renders scoreboard and handles game logic
   countEarlyStop: boolean; // count stats when stopping early?
 }
+
+export const configFromCode: Record<GameCode, GameConfig> = {
+  "solo-practice": SoloPracticeConfig,
+  "ranked-match": RankedMatchConfig,
+  "horse-match": HorseMatchConfig,
+  "solo-pig": SoloPigConfig,
+};

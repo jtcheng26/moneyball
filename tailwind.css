@@ -1,3 +1,7 @@
+.static {
+  position: static
+}
+
 .absolute {
   position: absolute
 }
@@ -6,12 +10,32 @@
   position: relative
 }
 
+.mt-10 {
+  margin-top: 2.5rem
+}
+
+.mt-8 {
+  margin-top: 2rem
+}
+
+.mt-20 {
+  margin-top: 5rem
+}
+
+.block {
+  display: block
+}
+
 .flex {
   display: flex
 }
 
 .\!flex {
   display: flex !important
+}
+
+.hidden {
+  display: none
 }
 
 .h-full {
@@ -51,6 +75,10 @@
 
 .pt-2 {
   padding-top: 0.5rem
+}
+
+.pt-10 {
+  padding-top: 2.5rem
 }
 
 .text-xl {

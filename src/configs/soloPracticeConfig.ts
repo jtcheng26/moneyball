@@ -1,11 +1,12 @@
 import SoloPracticeController from "../components/game-controllers/SoloPracticeController";
+import { GameCode } from "../data/data.types";
 import { THEME_COLORS } from "../theme";
 import { GameConfig } from "./gameConfig.types";
 
 export const SoloPracticeConfig: GameConfig = {
   name: "Solo Practice",
   description: "Practice shooting with automated scorekeeping!",
-  id: "solo-practice",
+  id: GameCode.SOLO_PRACTICE,
   color: THEME_COLORS.theme[50],
   icon: "BasketballHoop",
   entryFee: 0,

@@ -6,11 +6,19 @@ import { useOrientation } from "../../hooks/useOrientation";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Orientation, { OrientationType } from "react-native-orientation-locker";
 import CameraRoll from "@react-native-community/cameraroll";
+import useUserData from "../../hooks/useUserData";
+import { GameCode, MatchResults } from "../../data/data.types";
+import SideIconButton from "../lib/buttons/side-icon-button/SideIconButton";
+import { UILocationStylesOverlay } from "./RankedMatchController";
+import { THEME_COLORS } from "../../theme";
 
 export type SessionRecap = {
   make: number;
   miss: number;
   time: number;
+  video?: string;
+  thumbnail?: string;
+  mode: GameCode;
 };
 
 export type GameControllerProps = {
@@ -46,11 +54,13 @@ const SoloPracticeController = ({
       return () => clearInterval(timer);
     }
     if (gameState === "FINISHED") {
-      endSession({
+      const recap: SessionRecap = {
         make: greenScore,
         miss: redScore,
         time: timePassed,
-      });
+        mode: GameCode.SOLO_PRACTICE,
+      };
+      endSession(recap);
     }
   }, [gameState, timePassed]);
 
@@ -71,7 +81,7 @@ const SoloPracticeController = ({
 
   function startGame() {
     console.log("started");
-    updateGameState("RUNNING");
+    updateGameState("STARTING");
   }
 
   function UILocationStyles(orientation: OrientationType) {
@@ -97,13 +107,23 @@ const SoloPracticeController = ({
     <View style={[UILocationStyles(orientation), styles.scoreboardContainer]}>
       <Scoreboard
         scores={[greenScore, redScore]}
-        title={gameTitle(gameState)}
+        title={gameState === "STARTING" ? "Get Ready!" : gameTitle(gameState)}
         timeLeft={gameState === "RUNNING" ? timePassed : undefined}
         active={gameState !== "PREPARING"}
         underline
         pressable={gameState === "READY"}
         onPress={gameState === "READY" ? startGame : undefined}
       />
+      <View style={UILocationStylesOverlay(orientation)}>
+        <SideIconButton
+          // invert
+          icon="BasketballHoop"
+          height={60}
+          color={THEME_COLORS.theme[50]}
+          transparent
+          size={20}
+        />
+      </View>
     </View>
     // </SafeAreaView> */}
   );

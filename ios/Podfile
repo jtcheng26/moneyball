@@ -2,7 +2,7 @@ require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/react-native-unimodules/cocoapods.rb'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-platform :ios, '11.0'
+platform :ios, '13.0'
 
 target 'eagleapp2' do
   use_unimodules!
@@ -16,6 +16,9 @@ target 'eagleapp2' do
 
   pod 'TensorFlowLiteSwift'   
   pod 'OpenCV'
+
+  pod 'react-native-maps', :path => '../node_modules/react-native-maps'
+  pod 'react-native-google-maps', :path => '../node_modules/react-native-maps'
 
   # Uncomment to opt-in to using Flipper
   #

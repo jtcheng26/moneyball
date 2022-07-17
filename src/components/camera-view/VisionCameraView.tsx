@@ -27,7 +27,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { Svg, Rect, Circle } from "react-native-svg";
+import { Svg, Rect, Circle, RectProps, G } from "react-native-svg";
 import { useOrientation } from "../../hooks/useOrientation";
 import { FRAME_HEIGHT, FRAME_WIDTH } from "./constants";
 import type { HoopDetection, BallDetection } from "./VisionCameraView.types";
@@ -35,6 +35,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import useGameState, { GameState } from "../../hooks/useGameState";
 import { OrientationLocker, UNLOCK } from "react-native-orientation-locker";
+import { THEME_COLORS } from "../../theme";
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -174,8 +175,13 @@ export default function VisionCameraView({
         width: hoopDetection.value.box.width,
         height: hoopDetection.value.box.height,
         fill: "rgba(0,0,255, 0)",
-        strokeWidth: "10",
-        stroke: "rgb(50, 100, 255)",
+        strokeWidth: "15",
+        stroke:
+          shotState.value === "Score"
+            ? "rgb(111, 207, 151)"
+            : shotState.value === "Miss"
+            ? "rgb(235, 87, 87)"
+            : "rgb(252, 191, 73)",
       };
     } else {
       return {
@@ -203,7 +209,7 @@ export default function VisionCameraView({
         r: ballDetection.value.box.radius,
         fill: "rgba(0,0,0, 0)",
         strokeWidth: "10",
-        stroke: "rgba(255, 100, 50, 1)",
+        stroke: "rgb(247, 127, 0)",
         strokeOpacity: withTiming(ballDetection.value.opacity, {
           duration: 250,
           easing: Easing.bezier(0.25, 0.1, 0.25, 1),

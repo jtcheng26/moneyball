@@ -8,6 +8,7 @@ type Props = {
   visible?: boolean;
   onDismiss?: () => void;
   allOrientations?: boolean;
+  noPadding?: boolean;
 };
 
 const DarkenedModal = (props: Props) => {
@@ -23,7 +24,11 @@ const DarkenedModal = (props: Props) => {
       style={{ margin: 0 }}
       useNativeDriver
     >
-      <View style={styles.modal}>{props.children}</View>
+      <View
+        style={[{ paddingHorizontal: props.noPadding ? 0 : 20 }, styles.modal]}
+      >
+        {props.children}
+      </View>
     </Modal>
   );
 };
@@ -35,8 +40,7 @@ const styles = StyleSheet.create({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    width: "100%",
-    height: "100%",
-    paddingHorizontal: 20,
+    // width: "100%",
+    // height: "100%",
   },
 });

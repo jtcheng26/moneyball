@@ -34,6 +34,7 @@ export default function Scoreboard({
   height,
   underline,
   color,
+  textColor,
 }: ScoreboardProps) {
   const [press, setPress] = useState(false);
   const [fontsLoaded] = useFonts({

@@ -12,12 +12,16 @@ type Props = {
   underline?: boolean;
   height: number;
   labelProps?: Partial<LabelTextProps>;
+  pressable?: boolean;
+  onPress?: () => void;
+  transparent?: boolean;
+  size?: number;
 };
 
 const SideIconButton = (props: Props) => {
   return (
     <View style={styles.container}>
-      <View style={{ marginRight: 10 }}>
+      <View style={{ marginRight: !props.transparent ? 10 : 5 }}>
         <Icon
           name={props.icon}
           height={props.height * (2 / 3)}
@@ -25,20 +29,32 @@ const SideIconButton = (props: Props) => {
           fill={props.color.color}
         />
       </View>
-      <ColorBox
-        color={props.color}
-        flex
-        width={50}
-        height={props.height}
-        leftAlign
-        underline={props.underline}
-      >
+      {!props.transparent ? (
+        <ColorBox
+          color={props.color}
+          flex
+          width={50}
+          height={props.height}
+          leftAlign
+          underline={props.underline}
+          pressable={props.pressable}
+          onPress={props.onPress}
+        >
+          <LabelText
+            text={props.text}
+            size={props.size || undefined}
+            color={THEME_COLORS.dark[800]}
+            {...props.labelProps}
+          />
+        </ColorBox>
+      ) : (
         <LabelText
           text={props.text}
-          color={THEME_COLORS.dark[800]}
+          color={props.color}
           {...props.labelProps}
+          size={props.size || undefined}
         />
-      </ColorBox>
+      )}
     </View>
   );
 };

@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { SessionRecap } from "../components/game-controllers/SoloPracticeController";
-import { GameConfig } from "../configs/gameConfig.types";
+import { configFromCode, GameConfig } from "../configs/gameConfig.types";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTailwind } from "tailwind-rn/dist";
@@ -11,6 +11,9 @@ import Scoreboard from "../components/lib/scoreboard/Scoreboard";
 import ConfirmButton from "../components/lib/buttons/ConfirmButton";
 import SaveVideoPreview from "../components/save-video-preview/SaveVideoPreview";
 import LabelText from "../components/lib/text/LabelText";
+import SummaryStat from "../components/lib/summary-stat/SummaryStat";
+import FadeHeader from "../components/lib/spacing/FadeHeader";
+import { OrientationLocker } from "react-native-orientation-locker";
 
 type Props = {
   recap: SessionRecap;
@@ -24,8 +27,9 @@ const SessionRecapScreen = (props: Props) => {
   const tw = useTailwind();
   return (
     <View style={styles.big}>
+      <OrientationLocker orientation="PORTRAIT" />
       <SafeAreaView>
-        <View style={[styles.header, tw("px-8")]}>
+        <FadeHeader style={[styles.header, tw("px-8")]}>
           <View style={styles.titleBar}>
             <TitleText text="Session Recap" />
             <ConfirmButton onConfirm={props.onConfirm} />
@@ -33,12 +37,12 @@ const SessionRecapScreen = (props: Props) => {
           <View style={{ height: 20 }} />
           <Scoreboard
             scores={[props.recap.make, props.recap.miss]}
-            title="Solo practice"
+            title={configFromCode[props.recap.mode].name}
             timeLeft={props.recap.time}
             active
             underline
           />
-        </View>
+        </FadeHeader>
         <ScrollView
           contentContainerStyle={[
             styles.container,
@@ -50,27 +54,52 @@ const SessionRecapScreen = (props: Props) => {
           ]}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.section}>
-            <LabelText text="VIDEO" size={24} color={THEME_COLORS.dark[0]} />
-            <View style={{ height: 10 }} />
-            {props.video && props.thumbnail && (
+          {props.video && props.thumbnail ? (
+            <View style={styles.section}>
+              <LabelText text="VIDEO" size={24} color={THEME_COLORS.dark[0]} />
+              <View style={{ height: 10 }} />
+
               <SaveVideoPreview
                 video={props.video}
                 thumbnail={props.thumbnail}
                 location="Home"
               />
-            )}
-          </View>
+            </View>
+          ) : (
+            <View />
+          )}
           <View style={styles.section}>
             <LabelText text="STATS" size={24} color={THEME_COLORS.dark[0]} />
             <View style={{ height: 10 }} />
-            {props.video && props.thumbnail && (
-              <SaveVideoPreview
-                video={props.video}
-                thumbnail={props.thumbnail}
-                location="Home"
-              />
-            )}
+            <SummaryStat
+              stat={
+                Math.floor(
+                  100 *
+                    (props.recap.make /
+                      Math.max(1, props.recap.make + props.recap.miss))
+                ) + "%"
+              }
+              title="Shooting Percentage"
+              status="GOOD"
+              underline
+            />
+            <View style={{ height: 10 }} />
+            <SummaryStat
+              stat={props.recap.make + props.recap.miss}
+              title="Shots Taken"
+              status="NEUTRAL"
+              underline
+            />
+            <View style={{ height: 10 }} />
+            <SummaryStat
+              stat={
+                Math.floor((10 * props.recap.make) / (props.recap.time / 60)) /
+                10
+              }
+              title="Shots made per minute"
+              status="BAD"
+              underline
+            />
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -102,18 +131,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   header: {
-    position: "absolute",
-    top: 0,
-    paddingTop: 80,
-    zIndex: 10,
-    backgroundColor: THEME_COLORS.dark[800].color,
-    shadowColor: THEME_COLORS.dark[800].color,
-    shadowOffset: {
-      width: 0,
-      height: 40,
-    },
-    shadowOpacity: 1,
-    shadowRadius: 20,
+    marginTop: 30,
   },
   section: {
     paddingTop: 70,

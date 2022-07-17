@@ -7,12 +7,16 @@ import ButtonText from "../text/ButtonText";
 type Props = {
   color: ThemeColor;
   buttonText?: string;
+  buttonColor?: ThemeColor;
   buttonIcon?: string;
   children?: React.ReactNode;
   width: number;
   height: number;
   onPress?: () => void;
   pressable?: boolean;
+  centered?: boolean;
+  noUnderline?: boolean;
+  buttonTextSize?: number;
 };
 
 const GameCard = (props: Props) => {
@@ -48,12 +52,13 @@ const GameCard = (props: Props) => {
             color={props.color}
             width={props.width}
             height={props.height / 5}
-            underline
-            leftAlign
+            underline={!props.noUnderline}
+            leftAlign={!props.centered}
           >
             <ButtonText
               text={props.buttonText ? props.buttonText : ""}
-              size={14}
+              size={props.buttonTextSize || 14}
+              color={props.buttonColor}
             />
           </ColorBox>
         </View>

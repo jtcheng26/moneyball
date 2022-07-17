@@ -16,6 +16,7 @@ type Props = {
   onPress?: () => void;
   disabled?: boolean;
   labelProps?: Partial<LabelTextProps>;
+  invert?: boolean;
 };
 
 const IconButton = (props: Props) => {
@@ -32,18 +33,35 @@ const IconButton = (props: Props) => {
     : THEME_COLORS.dark[800].color;
   return (
     <View style={styles.outer}>
-      <ColorBox
-        underline={props.underline}
-        width={width}
-        height={height}
-        color={props.color}
-        pressable={!props.disabled}
-        onPress={props.onPress}
-        flex={!!props.labelProps}
-        leftAlign={!!props.labelProps}
-      >
-        <View style={[styles.inner]}>
-          <Icon name={props.icon} fill={iconColor} height={ih} width={iw} />
+      {!props.invert ? (
+        <ColorBox
+          underline={props.underline}
+          width={width}
+          height={height}
+          color={props.color}
+          pressable={!props.disabled}
+          onPress={props.onPress}
+          flex={!!props.labelProps}
+          leftAlign={!!props.labelProps}
+        >
+          <View style={[styles.inner]}>
+            <Icon name={props.icon} fill={iconColor} height={ih} width={iw} />
+            {props.labelProps && (
+              <>
+                <View style={{ width: 5 }} />
+                <LabelText {...props.labelProps} />
+              </>
+            )}
+          </View>
+        </ColorBox>
+      ) : (
+        <View>
+          <Icon
+            name={props.icon}
+            fill={props.color.color}
+            height={ih}
+            width={iw}
+          />
           {props.labelProps && (
             <>
               <View style={{ width: 5 }} />
@@ -51,7 +69,7 @@ const IconButton = (props: Props) => {
             </>
           )}
         </View>
-      </ColorBox>
+      )}
     </View>
   );
 };

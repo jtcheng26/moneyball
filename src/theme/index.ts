@@ -15,11 +15,11 @@ export const THEME_COLORS: Record<string, Record<number, ThemeColor>> = {
     },
     200: {
       color: "#8098A4",
-      underline: "#264F64",
+      underline: "#5C7B8A",
     },
     500: {
       color: "#264F64",
-      underline: "#003049",
+      underline: "#133F56",
     },
     800: {
       color: "#003049",
@@ -50,6 +50,18 @@ export const THEME_COLORS: Record<string, Record<number, ThemeColor>> = {
     500: {
       color: "#F77F00",
       underline: "#D62828",
+    },
+  },
+  horse: {
+    500: {
+      color: "#d58d57",
+      underline: "#914f3b",
+    },
+  },
+  pig: {
+    500: {
+      color: "#f9a8d4",
+      underline: "#ec4899",
     },
   },
 };

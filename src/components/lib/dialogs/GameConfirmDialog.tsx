@@ -12,6 +12,7 @@ type Props = {
   entryFee: number;
   onConfirm?: () => void;
   onCancel?: () => void;
+  disabled?: boolean;
 };
 
 const GameConfirmDialog = (props: Props) => {
@@ -26,15 +27,21 @@ const GameConfirmDialog = (props: Props) => {
     >
       <View style={styles.container}>
         <View style={styles.ticketContainer}>
-          <TicketText entryFee={props.entryFee} size={26} />
+          <TicketText
+            entryFee={props.entryFee}
+            size={26}
+            bad={props.disabled}
+          />
         </View>
         <ColorBox
-          color={THEME_COLORS.theme[400]}
-          underline
+          color={
+            props.disabled ? THEME_COLORS.dark[200] : THEME_COLORS.theme[400]
+          }
+          underline={!props.disabled}
           width={150}
           height={60}
-          pressable
-          onPress={props.onConfirm}
+          pressable={!props.disabled}
+          onPress={!props.disabled ? props.onConfirm : undefined}
         >
           <LabelText text="PLAY" color={THEME_COLORS.dark[800]} />
         </ColorBox>

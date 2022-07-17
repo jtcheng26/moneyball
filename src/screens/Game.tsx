@@ -21,21 +21,44 @@ import { PhotoFile, VideoFile } from "react-native-vision-camera";
 import CameraRoll from "@react-native-community/cameraroll";
 import SessionRecapScreen from "./SessionRecap";
 import Modal from "react-native-modal";
+import saveGame, { saveSessionContent } from "../data/saveGame";
+import useUserData from "../hooks/useUserData";
+import { GameCode, MatchResults, RawMatch } from "../data/data.types";
+import sendSession from "../hooks/api/score";
+import LabelText from "../components/lib/text/LabelText";
 // import RecordScreen from "react-native-record-screen";
 
 type Props = {
   modeConfig: GameConfig;
   endSession: () => void;
   active: boolean;
+  game?: RawMatch;
 };
 
-const Game = ({ active, modeConfig, endSession }: Props) => {
+const Game = ({ active, modeConfig, endSession, game }: Props) => {
   const [scoreGreen, setScoreGreen] = useState(0);
   const [scoreRed, setScoreRed] = useState(0);
   const [sessionInfo, setSessionInfo] = useState<SessionRecap | null>(null);
   const [gameState, setGameState] = useState<GameState>("PREPARING");
   const [camState, setCamState] = useState<"FRONT" | "BACK">("FRONT");
   const [showExitDialog, setShowExitDialog] = useState(false);
+  const [countdown, setCountdown] = useState(-1);
+
+  useEffect(() => {
+    if (gameState === "STARTING") {
+      if (countdown === -1) setCountdown(5);
+      const interval = setInterval(() => {
+        if (countdown === 0) {
+          updateGameState("RUNNING");
+          setCountdown(-1);
+          clearInterval(interval);
+        } else if (countdown > 0) {
+          setCountdown(countdown - 1);
+        }
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [countdown, setCountdown, gameState]);
 
   // RecordScreen.setup({ mic: false });
 
@@ -56,11 +79,24 @@ const Game = ({ active, modeConfig, endSession }: Props) => {
 
   function finishGame(sessionInfo: SessionRecap) {
     console.log(sessionInfo);
+    // --------------------------------
+    // TODO:
+    // send scores to server here
+    if (game) {
+      sendSession(scoreGreen, game.id);
+    }
+    // --------------------------------
     setTimeout(() => {
       setSessionInfo(sessionInfo);
     }, 400);
 
     // endSession();
+  }
+
+  function finishSessionRecap() {
+    setTimeout(() => {
+      endSession();
+    }, 400);
   }
 
   function flipCamera() {
@@ -100,9 +136,9 @@ const Game = ({ active, modeConfig, endSession }: Props) => {
 
   const [video, setVideo] = useState<VideoFile>();
   const [thumbnail, setThumbnail] = useState<PhotoFile>();
+  const { data: user } = useUserData();
   function onRecordingFinished(video: VideoFile) {
     setVideo(video);
-    CameraRoll.save(video.path, { type: "video" });
     console.log(video.path);
   }
   function onThumbnailCapture(photo: PhotoFile) {
@@ -110,12 +146,32 @@ const Game = ({ active, modeConfig, endSession }: Props) => {
     console.log(photo.path);
   }
 
+  useEffect(() => {
+    if (sessionInfo) {
+      sessionInfo.video = video?.path;
+      sessionInfo.thumbnail = "file://" + thumbnail?.path;
+      if (modeConfig.numPlayers === 1) {
+        saveGame({
+          id: "0",
+          user: user,
+          userScore: scoreGreen,
+          modeCode: modeConfig.id,
+          ticketCost: modeConfig.entryFee,
+          userRecap: sessionInfo,
+        } as MatchResults);
+      } else if (game && user)
+        saveSessionContent(game.id, user.id, sessionInfo);
+    }
+  }, [sessionInfo]);
+
   return (
     <>
       <Modal
         style={{ margin: 0 }}
         supportedOrientations={["portrait", "landscape"]}
         isVisible={active}
+        useNativeDriver
+        hideModalContentWhileAnimating
       >
         <View>
           <>
@@ -146,6 +202,9 @@ const Game = ({ active, modeConfig, endSession }: Props) => {
                     iconColor={THEME_COLORS.dark[800]}
                     onPress={flipCamera}
                   />
+                  {/* <View style={styles.timer}>
+                    <LabelText text={countdown} size={80} />
+                  </View> */}
                 </View>
                 <modeConfig.controller
                   gameState={gameState as GameState}
@@ -156,6 +215,13 @@ const Game = ({ active, modeConfig, endSession }: Props) => {
                   orientation={orientation}
                 />
               </SafeAreaView>
+              {countdown >= 0 && (
+                <View style={styles.timerContainer} pointerEvents="box-none">
+                  <View style={styles.timer}>
+                    <LabelText text={countdown} size={50} />
+                  </View>
+                </View>
+              )}
             </VisionCameraView>
           </>
         </View>
@@ -169,7 +235,7 @@ const Game = ({ active, modeConfig, endSession }: Props) => {
             modeConfig={modeConfig}
             video={video?.path}
             thumbnail={"file://" + thumbnail?.path}
-            onConfirm={endSession}
+            onConfirm={finishSessionRecap}
           />
         </Modal>
         <DarkenedModal
@@ -188,7 +254,7 @@ const Game = ({ active, modeConfig, endSession }: Props) => {
               } else {
                 setTimeout(() => {
                   endSession();
-                }, 300);
+                }, 400);
               }
             }}
           />
@@ -211,5 +277,29 @@ const styles = StyleSheet.create({
     top: "5%",
     display: "flex",
     flexDirection: "column",
+  },
+
+  timerContainer: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  timer: {
+    width: 100,
+    height: 100,
+    backgroundColor: THEME_COLORS.red[500].color,
+    borderBottomWidth: 8,
+    borderBottomColor: THEME_COLORS.red[500].underline,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 100,
   },
 });

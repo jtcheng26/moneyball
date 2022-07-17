@@ -7,6 +7,7 @@ import LabelText from "../text/LabelText";
 import BodyText from "../text/BodyText";
 import IconButton from "../buttons/icon-button/IconButton";
 import CancelButton from "../buttons/CancelButton";
+import DialogBanner from "./DialogBanner";
 
 type Props = {
   title: string;
@@ -19,25 +20,14 @@ type Props = {
 };
 
 const Dialog = (props: Props) => {
-  const customBanner = {
-    backgroundColor: props.bannerColor?.color,
-    borderBottomWidth: 8,
-    borderBottomColor: props.bannerColor?.underline,
-  };
   return (
     <View style={styles.dialogContainer}>
-      {props.bannerText && (
-        <View style={[customBanner, styles.banner]}>
-          <LabelText text={props.bannerText} color={THEME_COLORS.dark[500]} />
-          <View style={styles.closeContainer}>
-            <CancelButton
-              size={40}
-              color={THEME_COLORS.red[500]}
-              iconColor={THEME_COLORS.dark[0]}
-              onCancel={props.onClose}
-            />
-          </View>
-        </View>
+      {props.bannerText && props.onClose && (
+        <DialogBanner
+          bannerText={props.bannerText}
+          bannerColor={props.bannerColor}
+          onClose={props.onClose}
+        />
       )}
       <ColorBox color={THEME_COLORS.dark[500]} flex leftAlign>
         <View style={styles.container}>
@@ -75,19 +65,8 @@ const styles = StyleSheet.create({
     padding: 15,
     width: "100%",
   },
-  closeContainer: {
-    marginLeft: "auto",
-  },
   dialogContainer: {
     display: "flex",
     flexDirection: "column",
-  },
-  banner: {
-    display: "flex",
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
   },
 });

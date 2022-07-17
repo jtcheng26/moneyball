@@ -50,7 +50,7 @@ const SaveVideoPreview = (props: Props) => {
           <View />
         )}
         <View style={styles.shareButtons}>
-          {saved ? (
+          {!saved ? (
             <StandardIconButton icon="Save" onPress={saveVideo} />
           ) : (
             <ConfirmButton outline />
