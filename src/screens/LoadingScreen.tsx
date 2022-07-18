@@ -20,6 +20,7 @@ import Icon from "../components/lib/buttons/icon-button/Icon";
 import { THEME_COLORS } from "../theme";
 import useRecentGames from "../hooks/useRecentGames";
 import { useWalletConnect } from "@walletconnect/react-native-dapp";
+import ReactNativeModal from "react-native-modal";
 
 type Props = {
   children?: React.ReactNode;
@@ -71,9 +72,11 @@ const LoadingScreen = (props: Props) => {
       activeGamesSuccess &&
       pastGamesSuccess &&
       conn.connected
-    )
-      // console.log("loaded");
-      setLoaded(true);
+    ) {
+      setTimeout(() => {
+        setLoaded(true);
+      }, 500);
+    }
   }, [
     user,
     fontsLoaded,
@@ -86,32 +89,50 @@ const LoadingScreen = (props: Props) => {
     pastGamesSuccess,
     conn.connected,
   ]);
-  return loaded ? (
-    props.children
-  ) : (
-    <View style={styles.container}>
-      <Icon name="Logo" width={176} height={100} />
-      <View style={styles.loader}>
-        <Spinner
-          type="Circle"
-          isVisible
-          color={THEME_COLORS.theme[500].color}
-          size={50}
-        />
-      </View>
-    </View>
+  return (
+    <>
+      <ReactNativeModal
+        isVisible={!loaded}
+        useNativeDriver
+        style={styles.modal}
+        hideModalContentWhileAnimating
+        animationInTiming={10}
+        animationIn="fadeIn"
+      >
+        <View style={styles.container}>
+          <Icon name="Logo" width={176} height={100} />
+          <View style={styles.loader}>
+            <Spinner
+              type="Circle"
+              isVisible
+              color={THEME_COLORS.theme[500].color}
+              size={50}
+            />
+          </View>
+        </View>
+      </ReactNativeModal>
+      {props.children}
+    </>
   );
 };
 
 export default LoadingScreen;
 
 const styles = StyleSheet.create({
+  modal: {
+    width: "100%",
+    height: "100%",
+    margin: 0,
+  },
   container: {
     width: "100%",
     height: "100%",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    position: "absolute",
+    zIndex: 100000,
+    backgroundColor: THEME_COLORS.dark[800].color,
   },
   loader: {
     position: "absolute",

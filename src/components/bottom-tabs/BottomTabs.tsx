@@ -10,6 +10,7 @@ import { THEME_COLORS } from "../../theme";
 import Icon from "../lib/buttons/icon-button/Icon";
 import Shop from "../../screens/Shop";
 import LinearGradient from "react-native-linear-gradient";
+import MapScreen from "../../screens/MapScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -79,6 +80,21 @@ export default function BottomTabs() {
               <Icon
                 name="Basketball"
                 fill={focused ? THEME_COLORS.theme[500].color : color}
+                width={30}
+                height={30}
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="KOTC"
+          component={MapScreen}
+          options={{
+            tabBarLabel: "",
+            tabBarIcon: ({ focused, color }) => (
+              <Icon
+                name="Map"
+                fill={focused ? THEME_COLORS.theme[400].color : color}
                 width={30}
                 height={30}
               />

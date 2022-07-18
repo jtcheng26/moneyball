@@ -17,6 +17,7 @@ import { useWalletConnect } from "@walletconnect/react-native-dapp";
 
 type Props = {
   children?: React.ReactNode;
+  noFill?: boolean;
 };
 
 const ScreenWithHeaders = (props: Props) => {
@@ -31,10 +32,16 @@ const ScreenWithHeaders = (props: Props) => {
     connector.killSession();
   }
   return (
-    <View style={{ backgroundColor: THEME_COLORS.dark[800].color }}>
+    <View
+      style={{
+        backgroundColor: props.noFill
+          ? "transparent"
+          : THEME_COLORS.dark[800].color,
+      }}
+    >
       <OrientationLocker orientation="PORTRAIT" />
       <StatusBar barStyle="light-content" />
-      <FadeHeader>
+      <FadeHeader transparent={props.noFill}>
         <View style={styles.headerBar}>
           {isSuccess && (
             <ProfilePill
