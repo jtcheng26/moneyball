@@ -30,12 +30,13 @@ import LabelText from "../components/lib/text/LabelText";
 
 type Props = {
   modeConfig: GameConfig;
-  endSession: () => void;
+  endSession: (recap?: SessionRecap) => void;
   active: boolean;
   game?: RawMatch;
+  location?: string;
 };
 
-const Game = ({ active, modeConfig, endSession, game }: Props) => {
+const Game = ({ active, modeConfig, endSession, game, location }: Props) => {
   const [scoreGreen, setScoreGreen] = useState(0);
   const [scoreRed, setScoreRed] = useState(0);
   const [sessionInfo, setSessionInfo] = useState<SessionRecap | null>(null);
@@ -95,7 +96,7 @@ const Game = ({ active, modeConfig, endSession, game }: Props) => {
 
   function finishSessionRecap() {
     setTimeout(() => {
-      endSession();
+      endSession(sessionInfo ? sessionInfo : undefined);
     }, 400);
   }
 
@@ -195,13 +196,18 @@ const Game = ({ active, modeConfig, endSession, game }: Props) => {
                         : undefined
                     }
                   />
-                  <View style={{ height: 10 }} />
-                  <StandardIconButton
-                    icon="CameraFlip"
-                    color={THEME_COLORS.theme[50]}
-                    iconColor={THEME_COLORS.dark[800]}
-                    onPress={flipCamera}
-                  />
+                  {gameState !== "RUNNING" && (
+                    <>
+                      <View style={{ height: 10 }} />
+                      <StandardIconButton
+                        icon="CameraFlip"
+                        color={THEME_COLORS.theme[50]}
+                        iconColor={THEME_COLORS.dark[800]}
+                        onPress={flipCamera}
+                      />
+                    </>
+                  )}
+
                   {/* <View style={styles.timer}>
                     <LabelText text={countdown} size={80} />
                   </View> */}
@@ -213,6 +219,7 @@ const Game = ({ active, modeConfig, endSession, game }: Props) => {
                   redScore={scoreRed}
                   endSession={finishGame}
                   orientation={orientation}
+                  location={location}
                 />
               </SafeAreaView>
               {countdown >= 0 && (

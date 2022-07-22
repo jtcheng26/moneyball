@@ -10,6 +10,7 @@ type Props = {
   score?: number | string;
   status?: "GOOD" | "BAD" | "NEUTRAL";
   height?: number;
+  king?: boolean;
 };
 
 // small seen in game results
@@ -25,6 +26,7 @@ const RecapProfile = (props: Props) => {
       height={props.height || 45}
       width={"100%"}
       dark
+      king={props.king}
     />
   );
 };

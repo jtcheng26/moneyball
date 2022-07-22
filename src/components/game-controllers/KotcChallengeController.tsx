@@ -11,36 +11,21 @@ import { GameCode, MatchResults } from "../../data/data.types";
 import SideIconButton from "../lib/buttons/side-icon-button/SideIconButton";
 import { UILocationStylesOverlay } from "./RankedMatchController";
 import { THEME_COLORS } from "../../theme";
-
-export type SessionRecap = {
-  make: number;
-  miss: number;
-  time: number;
-  video?: string;
-  thumbnail?: string;
-  mode: GameCode;
-};
-
-export type GameControllerProps = {
-  gameState: GameState;
-  updateGameState: (state: GameState) => void;
-  greenScore: number;
-  redScore: number;
-  endSession: (sessionInfo: SessionRecap) => void;
-  orientation: OrientationType;
-  location?: string;
-};
+import LocationPill from "../location-pill/LocationPill";
+import { GameControllerProps, SessionRecap } from "./SoloPracticeController";
 
 // controller handles all game UI and functionality, custom for each mode
-const SoloPracticeController = ({
+const KotcChallengeController = ({
   gameState,
   updateGameState,
   greenScore,
   redScore,
   endSession,
   orientation,
+  location,
 }: GameControllerProps) => {
-  const [timePassed, setTimePassed] = useState(0);
+  const GAME_DURATION = 20; // 5 minutes
+  const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
   // useEffect(() => {
   //   if (greenScore === 4)
   //     endSession({ make: greenScore, miss: redScore, time: timePassed });
@@ -49,7 +34,12 @@ const SoloPracticeController = ({
   useEffect(() => {
     if (gameState === "RUNNING") {
       const timer = setInterval(() => {
-        setTimePassed(timePassed + 1);
+        if (timeLeft <= 0) {
+          updateGameState("FINISHED");
+          clearInterval(timer);
+        } else {
+          setTimeLeft(timeLeft - 1);
+        }
       }, 1000);
 
       return () => clearInterval(timer);
@@ -58,12 +48,12 @@ const SoloPracticeController = ({
       const recap: SessionRecap = {
         make: greenScore,
         miss: redScore,
-        time: timePassed,
-        mode: GameCode.SOLO_PRACTICE,
+        time: GAME_DURATION,
+        mode: GameCode.KOTC_CHALLENGE,
       };
       endSession(recap);
     }
-  }, [gameState, timePassed]);
+  }, [gameState, timeLeft]);
 
   function gameTitle(state: GameState) {
     switch (state) {
@@ -72,7 +62,7 @@ const SoloPracticeController = ({
       case "READY":
         return "Press to Start";
       case "RUNNING":
-        return "Solo Practice";
+        return "King of the Court";
       case "FINISHED":
         return "Finished";
       default:
@@ -109,28 +99,21 @@ const SoloPracticeController = ({
       <Scoreboard
         scores={[greenScore, redScore]}
         title={gameState === "STARTING" ? "Get Ready!" : gameTitle(gameState)}
-        timeLeft={gameState === "RUNNING" ? timePassed : undefined}
+        timeLeft={gameState === "RUNNING" ? timeLeft : undefined}
         active={gameState !== "PREPARING"}
         underline
         pressable={gameState === "READY"}
         onPress={gameState === "READY" ? startGame : undefined}
       />
       <View style={UILocationStylesOverlay(orientation)}>
-        <SideIconButton
-          // invert
-          icon="BasketballHoop"
-          height={60}
-          color={THEME_COLORS.theme[50]}
-          transparent
-          size={20}
-        />
+        <LocationPill name={location ? location : ""} />
       </View>
     </View>
     // </SafeAreaView> */}
   );
 };
 
-export default SoloPracticeController;
+export default KotcChallengeController;
 
 const styles = StyleSheet.create({
   container: {

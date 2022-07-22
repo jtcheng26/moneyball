@@ -105,7 +105,7 @@ const HorseMatchController = ({
         pressable={gameState === "READY"}
         onPress={gameState === "READY" ? startGame : undefined}
       />
-      <View style={UILocationStylesOverlayƒ(orientation)}>
+      <View style={UILocationStylesOverlay(orientation)}>
         <SideIconButton
           // invert
           text={"HORSE".substring(0, redScore)}

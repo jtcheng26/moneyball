@@ -15,11 +15,15 @@ import { THEME_COLORS } from "../../theme";
 import LabelText from "../lib/text/LabelText";
 import SideIconButton from "../lib/buttons/side-icon-button/SideIconButton";
 
-export function UILocationStylesOverlay(orientation: OrientationType) {
+export function UILocationStylesOverlay(
+  orientation: OrientationType,
+  flip?: boolean
+) {
   if (orientation === "PORTRAIT") {
     return {
       position: "absolute",
-      right: 30,
+      right: flip ? 30 : "auto",
+      left: !flip ? 30 : "auto",
       bottom: 80,
     };
   } else if (orientation === "LANDSCAPE-RIGHT") {

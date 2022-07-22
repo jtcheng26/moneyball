@@ -62,17 +62,17 @@ const PurchaseButton = ({
 
       const ethers_provider = new ethers.providers.Web3Provider(provide);
       const signer = ethers_provider.getSigner();
-      const contr = new ethers.Contract(
-        "0xA0Fbd0cDDdE9fb2F91327f053448a0F3319552F7",
-        tokenABI,
-        ethers_provider
-      );
+      // const contr = new ethers.Contract(
+      //   "0xA0Fbd0cDDdE9fb2F91327f053448a0F3319552F7",
+      //   tokenABI,
+      //   ethers_provider
+      // );
       const contr2 = new ethers.Contract(
-        "0x6841e5c93DdFDe42D0d6B6bf7F1fE45207dB21c0",
+        "0x88E49F80e9799Be6E400EdF90adA244C15feB1F0",
         ticketABI,
         ethers_provider
       );
-      const conn = contr.connect(signer);
+      // const conn = contr.connect(signer);
       const conn2 = contr2.connect(signer);
       // await conn.functions
       //   .approve(
@@ -86,18 +86,33 @@ const PurchaseButton = ({
       //     console.log(res);
       //   });
 
-      conn2.functions
-        .buyTicketsWithBTT(
-          // await signer.getAddress(),
-          amount
-        )
-        .catch((err) => {
-          console.error(err);
-          resolve(false);
-        })
-        .then((r) => {
-          resolve(true);
-        });
+      if (currency === "BTT") {
+        conn2.functions
+          .buyTicketsWithBTT(
+            // await signer.getAddress(),
+            amount
+          )
+          .catch((err) => {
+            console.error(err);
+            resolve(false);
+          })
+          .then((r) => {
+            resolve(true);
+          });
+      } else {
+        conn2.functions
+          .buyTicketsWithBALL(
+            // await signer.getAddress(),
+            amount
+          )
+          .catch((err) => {
+            console.error(err);
+            resolve(false);
+          })
+          .then((r) => {
+            resolve(true);
+          });
+      }
     });
     // console.log(amount, price, currency);
   }

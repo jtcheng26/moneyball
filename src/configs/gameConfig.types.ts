@@ -2,6 +2,7 @@ import { GameControllerProps } from "../components/game-controllers/SoloPractice
 import { GameCode } from "../data/data.types";
 import { ThemeColor } from "../theme";
 import { HorseMatchConfig } from "./horseMatchConfig";
+import { KotcChallengeConfig } from "./kotcChallengeConfig";
 import { RankedMatchConfig } from "./rankedMatchConfig";
 import { SoloPigConfig } from "./soloPigConfig";
 import { SoloPracticeConfig } from "./soloPracticeConfig";
@@ -24,4 +25,5 @@ export const configFromCode: Record<GameCode, GameConfig> = {
   "ranked-match": RankedMatchConfig,
   "horse-match": HorseMatchConfig,
   "solo-pig": SoloPigConfig,
+  "kotc-challenge": KotcChallengeConfig,
 };

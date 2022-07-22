@@ -25,6 +25,7 @@ interface ProfileButtonProps {
   height?: number;
   score?: number | string;
   status?: "GOOD" | "BAD" | "NEUTRAL";
+  king?: boolean;
 }
 
 export default function ProfileButton({
@@ -39,6 +40,7 @@ export default function ProfileButton({
   score,
   status,
   dark,
+  king,
 }: ProfileButtonProps) {
   const [press, setPress] = useState(false);
   const [fontsLoaded] = useFonts({
@@ -80,6 +82,7 @@ export default function ProfileButton({
         <IconButton
           icon={icon}
           color={color}
+          iconColor={!king ? bgColor : THEME_COLORS.red[500]}
           width={h}
           height={h}
           disabled

@@ -17,6 +17,7 @@ type Props = {
   disabled?: boolean;
   labelProps?: Partial<LabelTextProps>;
   invert?: boolean;
+  pad?: boolean;
 };
 
 const IconButton = (props: Props) => {
@@ -48,7 +49,7 @@ const IconButton = (props: Props) => {
             <Icon name={props.icon} fill={iconColor} height={ih} width={iw} />
             {props.labelProps && (
               <>
-                <View style={{ width: 5 }} />
+                <View style={{ width: props.pad ? 7 : 5 }} />
                 <LabelText {...props.labelProps} />
               </>
             )}
@@ -64,7 +65,7 @@ const IconButton = (props: Props) => {
           />
           {props.labelProps && (
             <>
-              <View style={{ width: 5 }} />
+              <View style={{ width: props.pad ? 7 : 5 }} />
               <LabelText {...props.labelProps} />
             </>
           )}

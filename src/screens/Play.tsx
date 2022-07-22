@@ -95,6 +95,15 @@ export default function Play() {
     isSuccess: activeGamesSuccess,
     refetch,
   } = useActiveGames();
+  const activeNoKOTC = useMemo(() => {
+    if (activeGames && activeGames.length) {
+      return activeGames.filter(
+        (game) => game.mode_id !== GameCode.KOTC_CHALLENGE
+      );
+    }
+
+    return [];
+  }, [activeGames]);
   const { data: tix, refetch: refetchTix } = useTickets();
   const { data: trophies, refetch: refetchTrophies } = useTrophies();
   const { data: tokens, refetch: refetchTokens } = useTokens();
@@ -240,22 +249,18 @@ export default function Play() {
       </DarkenedModal>
       <ScreenWithHeaders>
         <ScrollScreen rf={scrollRef}>
-          {activeGamesSuccess &&
-            ((activeGames && activeGames.length > 0) ||
-              pendingGames.length > 0) && (
-              <View style={styles.section}>
-                <ActiveCarousel
-                  games={
-                    activeGames
-                      ? pendingGames.concat(activeGames)
-                      : pendingGames
-                  }
-                  onPress={onPressActive}
-                  startGame={startGame}
-                  userID={conn.accounts[0]}
-                />
-              </View>
-            )}
+          {(activeNoKOTC.length > 0 || pendingGames.length > 0) && (
+            <View style={styles.section}>
+              <ActiveCarousel
+                games={
+                  activeGames ? pendingGames.concat(activeNoKOTC) : pendingGames
+                }
+                onPress={onPressActive}
+                startGame={startGame}
+                userID={conn.accounts[0]}
+              />
+            </View>
+          )}
           <View style={styles.section}>
             <PlayCarousel onPress={onPressPlay} />
           </View>

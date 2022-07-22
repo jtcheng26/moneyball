@@ -14,6 +14,7 @@ export enum GameCode {
   RANKED_MATCH = "ranked-match",
   HORSE_MATCH = "horse-match",
   SOLO_PIG = "solo-pig",
+  KOTC_CHALLENGE = "kotc-challenge",
 }
 // The logged in user
 // GET/SET
@@ -75,6 +76,7 @@ export interface RawMatch {
     icon: string;
     trophies: number;
   }[];
+  location?: LocationCoordinates;
 }
 
 export interface RawPlayer {
@@ -96,6 +98,25 @@ export interface RawGameRequest {
   requestee: string;
   mode_id: GameCode;
   ticket_cost: number;
+}
+
+export interface LocationCoordinates {
+  latitude: number;
+  longitude: number;
+}
+
+export enum GameEvent {
+  NO_EVENT = "no-event",
+  TICKET_EVENT = "ticket-event",
+}
+
+export interface CourtLocation {
+  name: string;
+  coordinates: LocationCoordinates;
+  owner_id: string;
+  challenge_cost: number;
+  event: GameEvent;
+  image: string;
 }
 
 // ----------------------------

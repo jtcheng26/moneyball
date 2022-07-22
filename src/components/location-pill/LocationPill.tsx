@@ -7,6 +7,7 @@ type Props = {
   location?: string;
   name: string;
   height?: number;
+  big?: boolean;
 };
 
 const LocationPill = (props: Props) => {
@@ -15,14 +16,16 @@ const LocationPill = (props: Props) => {
       icon="Location"
       // width={150}
       height={props.height || 40}
-      iconSize={22}
+      iconSize={props.big ? 26 : 22}
       underline
       color={THEME_COLORS.theme[50]}
       labelProps={{
         text: props.name,
         color: THEME_COLORS.dark[800],
-        size: 15,
+        size: props.big ? 20 : 15,
       }}
+      pad={props.big}
+      disabled
     />
   );
 };

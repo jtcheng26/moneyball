@@ -23,6 +23,10 @@ export async function unauthPost(path: string, data: string[][]) {
   ).json();
 }
 
+export async function justGet(path: string) {
+  return await (await fetch("http://192.168.0.104:8080/v1" + path)).json();
+}
+
 export async function authPost(token: string, path: string, data?: string[][]) {
   const form = authForm(token);
   if (data)
@@ -49,6 +53,7 @@ export async function connect(msg: string, addr: string) {
 export default function useAuth() {
   return useQuery(["auth"], async () => {
     const sessionToken = await AsyncStorage.getItem("EAGLE_SESSION_TOKEN");
+    console.log(sessionToken);
     return sessionToken;
   });
 }
