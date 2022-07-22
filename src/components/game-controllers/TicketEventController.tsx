@@ -13,10 +13,11 @@ import { UILocationStylesOverlay } from "./RankedMatchController";
 import { THEME_COLORS } from "../../theme";
 import LocationPill from "../location-pill/LocationPill";
 import { GameControllerProps, SessionRecap } from "./SoloPracticeController";
+import Icon from "../lib/buttons/icon-button/Icon";
 import useVisualCurrency from "../../hooks/useVisual";
 
 // controller handles all game UI and functionality, custom for each mode
-const KotcChallengeController = ({
+const TicketEventController = ({
   gameState,
   updateGameState,
   greenScore,
@@ -35,7 +36,6 @@ const KotcChallengeController = ({
 
   useEffect(() => {
     if (gameState === "RUNNING") {
-      upd({ tokens: 1000 });
       const timer = setInterval(() => {
         if (timeLeft <= 0) {
           updateGameState("FINISHED");
@@ -54,6 +54,9 @@ const KotcChallengeController = ({
         time: GAME_DURATION,
         mode: GameCode.KOTC_CHALLENGE,
       };
+
+      upd({ tix: 10 * greenScore }); //
+
       endSession(recap);
     }
   }, [gameState, timeLeft]);
@@ -65,7 +68,7 @@ const KotcChallengeController = ({
       case "READY":
         return "Press to Start";
       case "RUNNING":
-        return "King of the Court";
+        return "Ticket Shootout";
       case "FINISHED":
         return "Finished";
       default:
@@ -109,6 +112,8 @@ const KotcChallengeController = ({
         onPress={gameState === "READY" ? startGame : undefined}
       />
       <View style={UILocationStylesOverlay(orientation)}>
+        <Icon name="Ticket" fill={THEME_COLORS.theme[400].color} />
+        <View style={{ height: 5 }} />
         <LocationPill name={location ? location : ""} />
       </View>
     </View>
@@ -116,7 +121,7 @@ const KotcChallengeController = ({
   );
 };
 
-export default KotcChallengeController;
+export default TicketEventController;
 
 const styles = StyleSheet.create({
   container: {

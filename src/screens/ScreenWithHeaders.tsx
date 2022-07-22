@@ -1,5 +1,5 @@
 import { StatusBar, StyleSheet, Text, View } from "react-native";
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { THEME_COLORS } from "../theme";
 import { OrientationLocker } from "react-native-orientation-locker";
 import FadeHeader from "../components/lib/spacing/FadeHeader";
@@ -14,18 +14,20 @@ import useTokens from "../hooks/useTokens";
 import useUserData from "../hooks/useUserData";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useWalletConnect } from "@walletconnect/react-native-dapp";
+import useVisualCurrency from "../hooks/useVisual";
 
 type Props = {
   children?: React.ReactNode;
   noFill?: boolean;
+  tix?: number; // for cosmetic updates while waiting for the actual contract to update
+  trophies?: number;
+  tokens?: number;
 };
 
 const ScreenWithHeaders = (props: Props) => {
   const { data: auth } = useAuth();
   const { data: user, isSuccess, refetch: refetchUser } = useUserData();
-  const { data: tix, refetch: refetchTix } = useTickets();
-  const { data: trophies, refetch: refetchTrophies } = useTrophies();
-  const { data: tokens, refetch: refetchTokens } = useTokens();
+  const { tix, tokens, trophies } = useVisualCurrency();
   const connector = useWalletConnect();
   function logout() {
     AsyncStorage.removeItem("EAGLE_SESSION_TOKEN");
@@ -43,10 +45,10 @@ const ScreenWithHeaders = (props: Props) => {
       <StatusBar barStyle="light-content" />
       <FadeHeader transparent={props.noFill}>
         <View style={styles.headerBar}>
-          {isSuccess && (
+          {!!user && (
             <ProfilePill
               name={user.name}
-              trophies={trophies || trophies == 0 ? trophies : 0}
+              trophies={trophies}
               icon={user.icon}
               onPress={logout} // TODO: move this to profile page
             />
@@ -54,14 +56,14 @@ const ScreenWithHeaders = (props: Props) => {
         </View>
       </FadeHeader>
       <View style={styles.currencyBox}>
-        <TokenButton value={tokens || tokens == 0 ? tokens : 0} />
+        <TokenButton value={tokens} />
         <View style={{ width: 20 }} />
-        <TicketButton value={tix || tix == 0 ? tix : 0} />
+        <TicketButton value={tix} />
       </View>
       {props.children}
     </View>
   );
-};
+};;
 
 export default ScreenWithHeaders;
 

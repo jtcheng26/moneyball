@@ -46,6 +46,7 @@ import ScreenWithHeaders from "./ScreenWithHeaders";
 import ScrollScreen from "../components/lib/spacing/ScrollScreen";
 import useRecentGames from "../hooks/useRecentGames";
 import { useWalletConnect } from "@walletconnect/react-native-dapp";
+import useVisualCurrency from "../hooks/useVisual";
 
 export default function Play() {
   const tw = useTailwind();
@@ -104,12 +105,11 @@ export default function Play() {
 
     return [];
   }, [activeGames]);
-  const { data: tix, refetch: refetchTix } = useTickets();
-  const { data: trophies, refetch: refetchTrophies } = useTrophies();
-  const { data: tokens, refetch: refetchTokens } = useTokens();
+  const { tix, upd } = useVisualCurrency();
   async function refetchAll() {
     refetch();
-    await Promise.all([refetchTix(), refetchTrophies(), refetchTokens()]);
+    refetchRecent();
+    // await Promise.all([refetchTix(), refetchTrophies(), refetchTokens()]);
     refetchUser();
   }
   const cb = useCallback(() => {
@@ -161,20 +161,30 @@ export default function Play() {
     [scrollRef, pendingGames]
   );
 
-  function onMatchFound(match: RawMatch) {
+  function onMatchFound(match: RawMatch, notifType: NotificationCode) {
     setPendingGames([]); // TODO: delete the actual pending game instead of all
     refetch();
-    let x = 0;
-    // wait for contract and stuff to update
-    const interval = setInterval(async () => {
-      await Promise.all([refetchTix(), refetchTrophies(), refetchTokens()]);
-      x++;
-      if (x == 10) {
-        clearInterval(interval);
-      }
-    }, 2000);
+    if (notifType === NotificationCode.GAME_START) upd({ tix: -50 }); // temp
+    else if (notifType === NotificationCode.GAME_END) {
+      const p =
+        match.players[0].id.toLowerCase() === conn.accounts[0].toLowerCase()
+          ? 0
+          : 1;
+      const o = p === 0 ? 1 : 0;
+      if (match.players[p].score > match.players[o].score)
+        upd({ trophies: 100 });
+      else if (match.players[p].score === match.players[o].score)
+        upd({ tix: 50 });
+    }
 
-    refetchRecent();
+    if (notifType === NotificationCode.GAME_END) {
+      let x = 0;
+      const rec = setInterval(() => {
+        refetchRecent();
+        x++;
+        if (x == 5) clearInterval(rec);
+      }, 1000);
+    }
   }
 
   return (

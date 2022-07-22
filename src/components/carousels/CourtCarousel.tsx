@@ -21,8 +21,9 @@ type Props = {
   courts: CourtLocation[];
   startGame: (config: GameConfig, court: CourtLocation) => void;
   userID: string;
-  onSelect: (court: CourtLocation) => void;
+  onSelect: (court: CourtLocation, idx: number) => void;
   selected: number;
+  isDisabled: Record<string, boolean>;
 };
 
 const CourtCarousel = (props: Props) => {
@@ -39,13 +40,14 @@ const CourtCarousel = (props: Props) => {
         data={props.courts}
         layoutCardOffset={15}
         onSnapToItem={(idx) => {
-          props.onSelect(props.courts[idx]);
+          props.onSelect(props.courts[idx], idx);
         }}
         renderItem={({ item, index }) => (
           <CourtCard
             location={item}
             onPlay={props.startGame}
             userID={props.userID}
+            disabled={props.isDisabled[item.name]}
           />
         )}
       />

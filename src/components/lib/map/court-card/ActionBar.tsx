@@ -11,6 +11,7 @@ type Props = {
   icon: string;
   color: ThemeColor;
   onPress: () => void;
+  disabled?: boolean;
 };
 
 const ActionBar = (props: Props) => {
@@ -19,18 +20,18 @@ const ActionBar = (props: Props) => {
       <SideIconButton
         icon={props.icon}
         text={props.cost + ""}
-        color={props.color}
+        color={props.disabled ? THEME_COLORS.dark[200] : props.color}
         height={36}
         transparent
       />
       <View style={{ width: 15 }} />
       <ColorBox
-        color={props.color}
+        color={props.disabled ? THEME_COLORS.dark[200] : props.color}
         underline={true}
         width={150}
         height={40}
-        pressable={true}
         onPress={props.onPress}
+        pressable={!props.disabled}
       >
         <LabelText text={props.text} color={THEME_COLORS.dark[800]} />
       </ColorBox>

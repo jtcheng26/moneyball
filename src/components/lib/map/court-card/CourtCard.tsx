@@ -18,6 +18,7 @@ import ColorBox from "../../color-box/ColorBox";
 import LabelText from "../../text/LabelText";
 import ActionBar from "./ActionBar";
 import { KotcChallengeConfig } from "../../../../configs/kotcChallengeConfig";
+import { TicketEventConfig } from "../../../../configs/ticketEventConfig";
 
 type Props = {
   location: CourtLocation;
@@ -27,6 +28,7 @@ type Props = {
   children?: React.ReactNode;
   height?: number;
   score?: number;
+  disabled?: boolean;
 };
 
 const CourtCard = ({
@@ -37,6 +39,7 @@ const CourtCard = ({
   children,
   height,
   score,
+  disabled,
 }: Props) => {
   const [dims, setDims] = useState<number[]>([0, 0]);
   const { data: user, refetch } = useUser(location.owner_id);
@@ -48,7 +51,6 @@ const CourtCard = ({
       style={[styles.container, { height: height || 370 }]}
       onLayout={(event) => {
         const { x, y, width, height } = event.nativeEvent.layout;
-        console.log(width, height);
         setDims([width, height]);
       }}
     >
@@ -80,8 +82,9 @@ const CourtCard = ({
             cost={"+10/shot"}
             icon="Ticket"
             onPress={() => {
-              if (onPlay) onPlay(KotcChallengeConfig, location);
+              if (onPlay && !disabled) onPlay(TicketEventConfig, location);
             }}
+            disabled={disabled}
           />
         ) : location.event === GameEvent.NO_EVENT ? (
           <ActionBar
@@ -90,8 +93,9 @@ const CourtCard = ({
             cost={location.challenge_cost + ""}
             icon="CoinSolid"
             onPress={() => {
-              if (onPlay) onPlay(KotcChallengeConfig, location);
+              if (onPlay && !disabled) onPlay(KotcChallengeConfig, location);
             }}
+            disabled={disabled}
           />
         ) : null}
       </View>

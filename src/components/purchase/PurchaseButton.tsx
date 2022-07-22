@@ -39,79 +39,88 @@ const PurchaseButton = ({
   const [showModal, setShowModal] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
   const [failureModal, setFailureModal] = useState(false);
-  const { refetch: refetchUser } = useUserData();
-  const { refetch: refetchTix } = useTickets();
   const connector = useWalletConnect();
   async function buy() {
     return new Promise(async (resolve, reject) => {
-      if (!connector.connected) return false;
-      const provide = new WalletConnectProvider({
-        rpc: {
-          5: "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-          // ...
-        },
-        chainId: 5,
-        connector: connector,
-        qrcode: true,
-        qrcodeModalOptions: {
-          mobileLinks: ["metamask"],
-        },
-      });
+      try {
+        const keepAlive = setInterval(() => {
+          console.log("Keep alive");
+        }, 2000);
+        if (!connector.connected) return false;
+        const provide = new WalletConnectProvider({
+          rpc: {
+            5: "https://goerli.infura.io/v3/14dd41f30d274433a4bd818422e079b5",
+            // ...
+          },
+          chainId: 5,
+          connector: connector,
+          qrcode: true,
+          qrcodeModalOptions: {
+            mobileLinks: ["metamask"],
+          },
+        });
 
-      await provide.enable();
+        await provide.enable();
 
-      const ethers_provider = new ethers.providers.Web3Provider(provide);
-      const signer = ethers_provider.getSigner();
-      // const contr = new ethers.Contract(
-      //   "0xA0Fbd0cDDdE9fb2F91327f053448a0F3319552F7",
-      //   tokenABI,
-      //   ethers_provider
-      // );
-      const contr2 = new ethers.Contract(
-        "0x88E49F80e9799Be6E400EdF90adA244C15feB1F0",
-        ticketABI,
-        ethers_provider
-      );
-      // const conn = contr.connect(signer);
-      const conn2 = contr2.connect(signer);
-      // await conn.functions
-      //   .approve(
-      //     "0x6841e5c93DdFDe42D0d6B6bf7F1fE45207dB21c0",
-      //     ethers.BigNumber.from("1000000000000000000000")
-      //   )
-      //   .catch((err) => {
-      //     console.error(err);
-      //   })
-      //   .then((res) => {
-      //     console.log(res);
-      //   });
+        const ethers_provider = new ethers.providers.Web3Provider(provide);
+        const signer = ethers_provider.getSigner();
+        // const contr = new ethers.Contract(
+        //   "0xA0Fbd0cDDdE9fb2F91327f053448a0F3319552F7",
+        //   tokenABI,
+        //   ethers_provider
+        // );
+        const contr2 = new ethers.Contract(
+          "0x88E49F80e9799Be6E400EdF90adA244C15feB1F0",
+          ticketABI,
+          ethers_provider
+        );
+        // const conn = contr.connect(signer);
+        const conn2 = contr2.connect(signer);
+        // await conn.functions
+        //   .approve(
+        //     "0x6841e5c93DdFDe42D0d6B6bf7F1fE45207dB21c0",
+        //     ethers.BigNumber.from("1000000000000000000000")
+        //   )
+        //   .catch((err) => {
+        //     console.error(err);
+        //   })
+        //   .then((res) => {
+        //     console.log(res);
+        //   });
 
-      if (currency === "BTT") {
-        conn2.functions
-          .buyTicketsWithBTT(
-            // await signer.getAddress(),
-            amount
-          )
-          .catch((err) => {
-            console.error(err);
-            resolve(false);
-          })
-          .then((r) => {
-            resolve(true);
-          });
-      } else {
-        conn2.functions
-          .buyTicketsWithBALL(
-            // await signer.getAddress(),
-            amount
-          )
-          .catch((err) => {
-            console.error(err);
-            resolve(false);
-          })
-          .then((r) => {
-            resolve(true);
-          });
+        if (currency === "BTT") {
+          conn2.functions
+            .buyTicketsWithBTT(
+              // await signer.getAddress(),
+              amount
+            )
+            .catch((err) => {
+              console.error(err);
+              clearInterval(keepAlive);
+              resolve(false);
+            })
+            .then((r) => {
+              clearInterval(keepAlive);
+              resolve(true);
+            });
+        } else {
+          conn2.functions
+            .buyTicketsWithBALL(
+              // await signer.getAddress(),
+              amount
+            )
+            .catch((err) => {
+              clearInterval(keepAlive);
+              console.error(err);
+              resolve(false);
+            })
+            .then((r) => {
+              clearInterval(keepAlive);
+              resolve(true);
+            });
+        }
+      } catch (err) {
+        console.error(err);
       }
     });
     // console.log(amount, price, currency);
@@ -141,12 +150,10 @@ const PurchaseButton = ({
         <SuccessDialog
           title="Purchase Successful!"
           onConfirm={() => {
-            setSuccessModal(false);
             if (onPurchase) {
-              setTimeout(() => {
-                onPurchase();
-              }, 500);
+              onPurchase();
             }
+            setSuccessModal(false);
           }}
         />
       </DarkenedModal>

@@ -15,6 +15,7 @@ export enum GameCode {
   HORSE_MATCH = "horse-match",
   SOLO_PIG = "solo-pig",
   KOTC_CHALLENGE = "kotc-challenge",
+  TICKET_EVENT = "ticket-event",
 }
 // The logged in user
 // GET/SET

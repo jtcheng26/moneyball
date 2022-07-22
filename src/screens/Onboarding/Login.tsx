@@ -32,7 +32,6 @@ import {
   FiraCode_700Bold,
 } from "@expo-google-fonts/fira-code";
 import useAuth, { connect } from "../../hooks/useAuth";
-import { AuthContext } from "../../contexts/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import tokenValid from "../../hooks/api/tokenValid";
 import WalletConnectProvider from "@walletconnect/web3-provider";

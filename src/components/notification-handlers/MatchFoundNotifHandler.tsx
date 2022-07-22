@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   MatchResults,
   NotificationCode,
@@ -18,7 +18,7 @@ import { useWalletConnect } from "@walletconnect/react-native-dapp";
 import FinishedGameDialog from "../lib/dialogs/FinishedGameDialog";
 
 type Props = {
-  onNotif: (match: RawMatch) => void;
+  onNotif: (match: RawMatch, notifType: NotificationCode) => void;
   startGame: (config: GameConfig, game?: RawMatch) => void;
   modalReady: boolean; // don't show modal when another is showing
   showRecent: (config: GameConfig, result: MatchResults) => void;
@@ -68,8 +68,8 @@ const MatchFoundNotifHandler = (props: Props) => {
   );
 
   const onGameFound = useCallback(
-    (matches: RawMatch[]) => {
-      if (matches.length > 0) props.onNotif(matches[0]);
+    (matches: RawMatch[], notifType: NotificationCode) => {
+      if (matches.length > 0) props.onNotif(matches[0], notifType);
     },
     [props.onNotif]
   );
@@ -87,7 +87,7 @@ const MatchFoundNotifHandler = (props: Props) => {
         .map((notif: RawNotification) => notif.data as RawMatch);
       setNotifType(rawNotifs[0]["code"]);
       setNotifs(processed);
-      onGameFound(processed);
+      onGameFound(processed, rawNotifs[0]["code"]);
     }
   }, [rawNotifs]);
 

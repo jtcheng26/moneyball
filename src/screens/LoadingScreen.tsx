@@ -21,6 +21,10 @@ import { THEME_COLORS } from "../theme";
 import useRecentGames from "../hooks/useRecentGames";
 import { useWalletConnect } from "@walletconnect/react-native-dapp";
 import ReactNativeModal from "react-native-modal";
+import {
+  VisualCurrencyCtx,
+  VisualCurrencyUpdate,
+} from "../contexts/visualCurrency";
 
 type Props = {
   children?: React.ReactNode;
@@ -41,9 +45,21 @@ const LoadingScreen = (props: Props) => {
     isSuccess: userLoaded,
     refetch: refetchUser,
   } = useUserData();
-  const { isSuccess: tixLoaded, refetch: refetchTix } = useTickets();
-  const { isSuccess: trophiesLoaded, refetch: refetchTrophies } = useTrophies();
-  const { isSuccess: tokensLoaded, refetch: refetchTokens } = useTokens();
+  const {
+    data: dataTix,
+    isSuccess: tixLoaded,
+    refetch: refetchTix,
+  } = useTickets();
+  const {
+    data: dataTrophies,
+    isSuccess: trophiesLoaded,
+    refetch: refetchTrophies,
+  } = useTrophies();
+  const {
+    data: dataTokens,
+    isSuccess: tokensLoaded,
+    refetch: refetchTokens,
+  } = useTokens();
   const {
     data: activeGames,
     isSuccess: activeGamesSuccess,
@@ -54,13 +70,37 @@ const LoadingScreen = (props: Props) => {
     isSuccess: pastGamesSuccess,
     refetch: refetchRecent,
   } = useRecentGames(conn.accounts[0]);
+  const [currencyCtx, setCurrencyCtx] = useState({
+    tix: 0,
+    tokens: 0,
+    trophies: 0,
+  });
+  const currencyCtxValue = useMemo(
+    () => ({
+      tix: currencyCtx.tix,
+      tokens: currencyCtx.tokens,
+      trophies: currencyCtx.trophies,
+      upd: (upd: VisualCurrencyUpdate) => {
+        setCurrencyCtx({
+          tix: currencyCtx.tix + (upd.tix ? upd.tix : 0),
+          tokens: currencyCtx.tokens + (upd.tokens ? upd.tokens : 0),
+          trophies: currencyCtx.trophies + (upd.trophies ? upd.trophies : 0),
+        });
+      },
+    }),
+    [currencyCtx]
+  );
   useMemo(async () => {
-    if (!userLoaded) await refetchUser();
-    if (!tixLoaded) await refetchTix();
-    if (!trophiesLoaded) await refetchTrophies();
-    if (!tokensLoaded) await refetchTokens();
-    if (!activeGamesSuccess) await refetch();
-    if (!pastGamesSuccess) await refetchRecent();
+    if (authLoaded) {
+      if (!pastGamesSuccess) await refetchRecent();
+      if (!tokensLoaded) await refetchTokens();
+      if (!trophiesLoaded) await refetchTrophies();
+      if (!tixLoaded) await refetchTix();
+      if (!userLoaded && tixLoaded && trophiesLoaded && tokensLoaded)
+        await refetchUser();
+      if (!activeGamesSuccess) await refetch();
+    }
+
     if (
       !!user &&
       authLoaded &&
@@ -73,6 +113,12 @@ const LoadingScreen = (props: Props) => {
       pastGamesSuccess &&
       conn.connected
     ) {
+      console.log(dataTokens, dataTix);
+      setCurrencyCtx({
+        tix: dataTix,
+        tokens: dataTokens,
+        trophies: dataTrophies,
+      });
       setTimeout(() => {
         setLoaded(true);
       }, 500);
@@ -111,7 +157,9 @@ const LoadingScreen = (props: Props) => {
           </View>
         </View>
       </ReactNativeModal>
-      {props.children}
+      <VisualCurrencyCtx.Provider value={currencyCtxValue}>
+        {props.children}
+      </VisualCurrencyCtx.Provider>
     </>
   );
 };

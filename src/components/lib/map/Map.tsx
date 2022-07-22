@@ -5,7 +5,11 @@ import mapStyle from "./style.json";
 import Icon from "../buttons/icon-button/Icon";
 import { THEME_COLORS } from "../../../theme";
 import useLocations from "../../../hooks/useLocations";
-import { CourtLocation, LocationCoordinates } from "../../../data/data.types";
+import {
+  CourtLocation,
+  GameEvent,
+  LocationCoordinates,
+} from "../../../data/data.types";
 import { useSharedValue } from "react-native-reanimated";
 import useCurrentLocation from "../../../hooks/useCurrentLocation";
 import ReactNativeModal from "react-native-modal";
@@ -16,6 +20,10 @@ import { GameConfig } from "../../../configs/gameConfig.types";
 import { SessionRecap } from "../../game-controllers/SoloPracticeController";
 import DarkenedModal from "../dialogs/DarkenedModal";
 import KotcChallengeResultDialog from "../dialogs/KotcChallengeResultDialog";
+import { KotcChallengeConfig } from "../../../configs/kotcChallengeConfig";
+import TicketEventResultDialog from "../dialogs/TicketEventResultDialog";
+import { TicketEventConfig } from "../../../configs/ticketEventConfig";
+import useVisualCurrency from "../../../hooks/useVisual";
 // import { useAnimatedProps } from "react-native-reanimated";
 
 type Props = {
@@ -39,6 +47,12 @@ const Map = (props: Props) => {
     },
     [loc]
   );
+  const closeEnough = useCallback(
+    (court: CourtLocation) => {
+      return distance(court.coordinates) < 0.000003;
+    },
+    [distance]
+  );
   const courtsSorted = useMemo(() => {
     if (courts && courts.length) {
       return courts.sort((a, b) => {
@@ -48,6 +62,13 @@ const Map = (props: Props) => {
       return [];
     }
   }, [courts, distance]);
+  const disabledCourts = useMemo(() => {
+    const disabled: Record<string, boolean> = {};
+    courtsSorted?.forEach((c, i) => {
+      disabled[c.name] = !closeEnough(c);
+    });
+    return disabled;
+  }, [courtsSorted, closeEnough]);
   const conn = useWalletConnect();
   function onSelect(court: CourtLocation) {
     if (props.selected !== court.name) {
@@ -119,12 +140,11 @@ const Map = (props: Props) => {
         showsPointsOfInterest={false}
         style={styles.map}
         initialRegion={{
-          latitude: 34.045,
-          longitude: -118.4649,
-          latitudeDelta: 0.1,
-          longitudeDelta: 0.1,
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
         }}
-        // customMap
       >
         {courtsSorted.map((marker, idx) => (
           <Marker
@@ -134,18 +154,22 @@ const Map = (props: Props) => {
               setSelectedIdx(idx);
               onSelect(marker);
             }}
-            // title={marker.title}
-            // description={marker.description}
           >
             <Icon
               width={props.selected && marker.name === props.selected ? 60 : 40}
               height={
                 props.selected && marker.name === props.selected ? 60 : 40
               }
-              name="BasketballHoop"
+              name={
+                marker.event === GameEvent.TICKET_EVENT
+                  ? "Ticket"
+                  : "BasketballHoop"
+              }
               fill={
                 props.selected && marker.name === props.selected
                   ? THEME_COLORS.theme[500].color
+                  : !props.selected && !closeEnough(marker)
+                  ? THEME_COLORS.dark[200].color
                   : !props.selected
                   ? THEME_COLORS.theme[400].color
                   : THEME_COLORS.dark[200].color
@@ -153,15 +177,49 @@ const Map = (props: Props) => {
             />
           </Marker>
         ))}
+        <Marker coordinate={loc}>
+          <View
+            style={{
+              width: 30,
+              height: 30,
+              borderColor: THEME_COLORS.dark[0].color,
+              borderWidth: 4,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 100,
+              opacity: 1,
+            }}
+          >
+            <View
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: 100,
+                backgroundColor: THEME_COLORS.green[500].color,
+                opacity: 0.7,
+              }}
+            />
+          </View>
+        </Marker>
       </MapView>
       <DarkenedModal visible={!!results} onDismiss={closeResultModal}>
-        <KotcChallengeResultDialog
-          location={gameMarker}
-          win={true} // temp
-          onCancel={closeResultModal}
-          userID={conn.accounts[0]}
-          score={10}
-        />
+        {gameConfig === KotcChallengeConfig ? (
+          <KotcChallengeResultDialog
+            location={gameMarker}
+            win={true} // temp
+            onCancel={closeResultModal}
+            userID={conn.accounts[0]}
+            score={10}
+          />
+        ) : (
+          <TicketEventResultDialog
+            location={gameMarker}
+            onCancel={closeResultModal}
+            userID={conn.accounts[0]}
+            score={10}
+          />
+        )}
       </DarkenedModal>
       <ReactNativeModal
         isVisible={cardVisible}
@@ -173,14 +231,17 @@ const Map = (props: Props) => {
         useNativeDriver
         backdropOpacity={0}
         animationInTiming={500}
-        // coverScreen={false}
       >
         <CourtCarousel
           courts={courtsSorted}
           userID={conn.accounts[0]}
-          onSelect={onSelect}
+          onSelect={(court: CourtLocation, idx: number) => {
+            setSelectedIdx(idx);
+            onSelect(court);
+          }}
           startGame={startGame}
           selected={selectedIdx}
+          isDisabled={disabledCourts}
         />
       </ReactNativeModal>
       {game && gameConfig && (

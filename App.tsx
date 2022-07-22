@@ -8,7 +8,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Login from "./src/screens/Onboarding/Login";
 import { THEME_COLORS } from "./src/theme";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { AuthContext } from "./src/contexts/auth";
 
 const queryClient = new QueryClient();
 
@@ -27,11 +26,9 @@ export default function App() {
             redirectUrl="/"
             storageOptions={{ asyncStorage: AsyncStorage }}
           >
-            {/* <AuthContext.Provider value=""> */}
             <QueryClientProvider client={queryClient}>
               <Login />
             </QueryClientProvider>
-            {/* </AuthContext.Provider> */}
           </WalletConnectProvider>
         </TailwindProvider>
       </View>
