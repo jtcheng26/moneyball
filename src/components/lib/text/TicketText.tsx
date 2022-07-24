@@ -3,7 +3,7 @@ import LabelText from "./LabelText";
 import { THEME_COLORS } from "../../../theme";
 
 type Props = {
-  entryFee: number;
+  entryFee: number | string;
   size?: number;
   bad?: boolean;
 };

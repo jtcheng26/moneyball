@@ -58,27 +58,27 @@ export default function Play() {
   >(false);
   const [matching, setMatching] = useState(false);
   const [recapGame, setRecapGame] = useState<MatchResults>();
-  function playGame() {
+  function playGame(fee?: number) {
     setShowModal(false);
     if (gameConfig.numPlayers == 1) startGame(gameConfig);
     else {
-      onMatching(gameConfig.id);
+      onMatching(gameConfig.id, fee);
     }
   }
 
   function onPressPlay(config: GameConfig) {
     setGameConfig(config);
-    setShowModal("play");
+    showModalAnim("play");
   }
   function onPressActive(config: GameConfig, game?: RawMatch) {
     setGameConfig(config);
     setActiveGame(game);
-    setShowModal("active");
+    showModalAnim("active");
   }
   function onPressRecent(config: GameConfig, game: MatchResults) {
     setGameConfig(config);
     setRecapGame(game);
-    setShowModal("recent");
+    showModalAnim("recent");
   }
   const conn = useWalletConnect();
   const { data: user, isSuccess, refetch: refetchUser } = useUserData();
@@ -106,11 +106,16 @@ export default function Play() {
     return [];
   }, [activeGames]);
   const { tix, upd } = useVisualCurrency();
+  useEffect(() => {
+    setTimeout(() => {
+      setShowNotif(true);
+    }, 3000);
+  }, []);
   async function refetchAll() {
     refetch();
     refetchRecent();
     // await Promise.all([refetchTix(), refetchTrophies(), refetchTokens()]);
-    refetchUser();
+    // refetchUser();
   }
   const cb = useCallback(() => {
     if (auth) {
@@ -130,8 +135,10 @@ export default function Play() {
   }
 
   function endGame(gameID: string = "") {
+    setShowNotif(false);
     setAnimateClose(false);
     setTimeout(() => {
+      setShowNotif(true)
       refetch();
       setGame(false);
       refetchRecent();
@@ -139,13 +146,35 @@ export default function Play() {
     // reload stuff
   }
 
+  const [showNotif, setShowNotif] = useState(false);
+  function showModalAnim(t: "active" | "play" | "recent") {
+    setShowNotif(false);
+    setShowModal(t);
+  }
+
+  function closeModal() {
+    setShowModal(false);
+    setTimeout(() => {
+      setShowNotif(true);
+    }, 500);
+  }
+
   const scrollRef = useRef();
+  const [wagerFee, setWagerFee] = useState(0);
 
   const onMatching = useCallback(
-    (code: GameCode) => {
+    (code: GameCode, fee?: number) => {
+      if (fee) setWagerFee(fee);
       // ------------
       // send request here
-      startMatching(code, configFromCode[code].entryFee);
+      startMatching(
+        code,
+        code === GameCode.RANKED_MATCH
+          ? configFromCode[code].entryFee
+          : fee
+          ? fee
+          : 50
+      );
       // ------------
       if (scrollRef.current) {
         setPendingGames([code].concat(pendingGames));
@@ -164,16 +193,24 @@ export default function Play() {
   function onMatchFound(match: RawMatch, notifType: NotificationCode) {
     setPendingGames([]); // TODO: delete the actual pending game instead of all
     refetch();
-    if (notifType === NotificationCode.GAME_START) upd({ tix: -50 }); // temp
-    else if (notifType === NotificationCode.GAME_END) {
+    if (notifType === NotificationCode.GAME_START) {
+      if (match.mode_id === GameCode.WAGER_MATCH) {
+        upd({ tix: -1 * wagerFee });
+      } else {
+        upd({ tix: -50 }); // temp
+      }
+    } else if (notifType === NotificationCode.GAME_END) {
       const p =
         match.players[0].id.toLowerCase() === conn.accounts[0].toLowerCase()
           ? 0
           : 1;
       const o = p === 0 ? 1 : 0;
-      if (match.players[p].score > match.players[o].score)
-        upd({ trophies: 100 });
-      else if (match.players[p].score === match.players[o].score)
+      if (match.players[p].score > match.players[o].score) {
+        if (match.mode_id === GameCode.RANKED_MATCH) upd({ trophies: 100 });
+        else if (match.mode_id === GameCode.HORSE_MATCH) upd({ tokens: 600 });
+        else if (match.mode_id === GameCode.WAGER_MATCH)
+          upd({ tokens: match.prize ? match.prize : 0 });
+      } else if (match.players[p].score === match.players[o].score)
         upd({ tix: 50 });
     }
 
@@ -192,7 +229,7 @@ export default function Play() {
       <MatchFoundNotifHandler
         onNotif={onMatchFound}
         startGame={startGame}
-        modalReady={!showModal}
+        modalReady={showNotif}
         showRecent={(config: GameConfig, result: MatchResults) => {
           setTimeout(() => {
             onPressRecent(config, result);
@@ -207,9 +244,10 @@ export default function Play() {
           title={gameConfig.name}
           body={gameConfig.description}
           entryFee={gameConfig.entryFee}
-          onCancel={() => setShowModal(false)}
+          onCancel={closeModal}
           onConfirm={playGame}
           disabled={!tix || tix < gameConfig.entryFee}
+          wager={gameConfig.id === GameCode.WAGER_MATCH}
         />
       </DarkenedModal>
       <DarkenedModal
@@ -221,22 +259,7 @@ export default function Play() {
             userID={conn.accounts[0]}
             game={activeGame}
             config={gameConfig}
-            onCancel={() => setShowModal(false)}
-            onConfirm={startGame}
-            bannerText={gameConfig.name}
-          />
-        )}
-      </DarkenedModal>
-      <DarkenedModal
-        visible={showModal === "active"}
-        onDismiss={() => setShowModal(false)}
-      >
-        {!!activeGame && (
-          <ActiveGameDialog
-            userID={conn.accounts[0]}
-            game={activeGame}
-            config={gameConfig}
-            onCancel={() => setShowModal(false)}
+            onCancel={closeModal}
             onConfirm={startGame}
             bannerText={gameConfig.name}
           />
@@ -251,7 +274,7 @@ export default function Play() {
           <SessionRecapScreen
             recap={recapGame.userRecap}
             modeConfig={gameConfig}
-            onConfirm={() => setShowModal(false)}
+            onConfirm={closeModal}
             video={recapGame.userRecap.video}
             thumbnail={recapGame.userRecap.thumbnail}
           />

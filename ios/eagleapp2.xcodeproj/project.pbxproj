@@ -217,7 +217,7 @@
 				LastUpgradeCheck = 1130;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
-						DevelopmentTeam = L72R84TWAM;
+						DevelopmentTeam = 42HC4N8ZRV;
 						LastSwiftMigration = 1340;
 					};
 				};
@@ -383,7 +383,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = L72R84TWAM;
+				DEVELOPMENT_TEAM = 42HC4N8ZRV;
 				ENABLE_BITCODE = NO;
 				GCC_PREFIX_HEADER = "$(SRCROOT)/PrefixHeader.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (

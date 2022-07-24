@@ -15,6 +15,7 @@ import LocationPill from "../location-pill/LocationPill";
 import { GameControllerProps, SessionRecap } from "./SoloPracticeController";
 import Icon from "../lib/buttons/icon-button/Icon";
 import useVisualCurrency from "../../hooks/useVisual";
+import scoreTix from "../../hooks/api/scoreTix";
 
 // controller handles all game UI and functionality, custom for each mode
 const TicketEventController = ({
@@ -26,7 +27,7 @@ const TicketEventController = ({
   orientation,
   location,
 }: GameControllerProps) => {
-  const GAME_DURATION = 20; // 5 minutes
+  const GAME_DURATION = 60; // 5 minutes
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
   const { upd } = useVisualCurrency();
   // useEffect(() => {
@@ -52,10 +53,12 @@ const TicketEventController = ({
         make: greenScore,
         miss: redScore,
         time: GAME_DURATION,
-        mode: GameCode.KOTC_CHALLENGE,
+        mode: GameCode.TICKET_EVENT,
       };
 
       upd({ tix: 10 * greenScore }); //
+
+      scoreTix(greenScore);
 
       endSession(recap);
     }
@@ -119,7 +122,7 @@ const TicketEventController = ({
     </View>
     // </SafeAreaView> */}
   );
-};
+};;;
 
 export default TicketEventController;
 

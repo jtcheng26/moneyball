@@ -10,32 +10,35 @@ import ConfirmationDialog from "../lib/dialogs/ConfirmationDialog";
 import TicketText from "../lib/text/TicketText";
 import GameConfirmDialog from "../lib/dialogs/GameConfirmDialog";
 import DarkenedModal from "../lib/dialogs/DarkenedModal";
-import { MatchResults } from "../../data/data.types";
+import { GameCode, MatchResults } from "../../data/data.types";
 import RecapProfile from "../profile/RecapProfile";
 import SessionRecapScreen from "../../screens/SessionRecap";
 import Scoreboard from "../lib/scoreboard/Scoreboard";
 import SmallScoreboard from "../lib/scoreboard/SmallScoreboard";
+import SideIconButton from "../lib/buttons/side-icon-button/SideIconButton";
 
 type Props = {
   config: GameConfig;
   result: MatchResults;
+  prize?: number;
   big?: boolean;
   onPress?: (config: GameConfig, result: MatchResults) => void;
 };
 
-const GameResult = ({ config, result, big, onPress }: Props) => {
+const GameResult = ({ config, result, big, onPress, prize }: Props) => {
   return (
     <>
       <GameCard
         color={big ? THEME_COLORS.dark[200] : config.color}
         width={big ? "100%" : 220}
-        height={big ? 340 : 250}
+        height={big ? 300 : 250}
         buttonText={"View Recap"}
         pressable
         onPress={() => {
           if (onPress) onPress(config, result);
         }}
         buttonTextSize={big ? 20 : undefined}
+        slim={big}
       >
         <View style={styles.center}>
           <RecapProfile
@@ -75,14 +78,43 @@ const GameResult = ({ config, result, big, onPress }: Props) => {
               color={THEME_COLORS.dark[800]}
             />
           )}
-          <View style={styles.entryFee}>
-            <Icon
-              name={config.icon}
-              fill={!big ? config.color.color : THEME_COLORS.dark[200].color}
-              width={big ? 64 : 50}
-              height={big ? 64 : 50}
-            />
-          </View>
+          {!big && (
+            <View style={styles.entryFee}>
+              <Icon
+                name={config.icon}
+                fill={!big ? config.color.color : THEME_COLORS.dark[200].color}
+                width={big ? 64 : 50}
+                height={big ? 64 : 50}
+              />
+            </View>
+          )}
+          {big &&
+          (config.id === GameCode.HORSE_MATCH ||
+            config.id === GameCode.WAGER_MATCH) ? (
+            <View style={styles.reward}>
+              <SideIconButton
+                text={"+" + prize}
+                color={THEME_COLORS.green[500]}
+                icon="CoinSolid"
+                transparent
+                height={50}
+                size={24}
+              />
+            </View>
+          ) : big && config.id === GameCode.RANKED_MATCH ? (
+            <View style={styles.reward}>
+              <SideIconButton
+                text={"+" + prize}
+                color={THEME_COLORS.theme[400]}
+                icon="Medal"
+                transparent
+                height={50}
+                size={24}
+              />
+            </View>
+          ) : (
+            <View />
+          )}
 
           {/* <Icon
             name={config.icon}
@@ -115,5 +147,10 @@ const styles = StyleSheet.create({
     left: 15,
     // marginHorizontal: "auto",
     bottom: 10,
+  },
+  reward: {
+    position: "absolute",
+    left: 15,
+    bottom: 25,
   },
 });

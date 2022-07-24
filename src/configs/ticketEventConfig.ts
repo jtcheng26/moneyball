@@ -8,7 +8,7 @@ export const TicketEventConfig: GameConfig = {
   name: "Ticket Shootout",
   description:
     "Win tickets with every shot! No entry fee! Available once every 12 hours during the event.",
-  id: GameCode.KOTC_CHALLENGE,
+  id: GameCode.TICKET_EVENT,
   color: THEME_COLORS.theme[400],
   icon: "Ticket",
   entryFee: 0,

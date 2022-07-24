@@ -71,9 +71,9 @@ const KotcChallengeResultDialog = ({
                 <BodyText>Avg Income</BodyText>
                 <View style={{ height: 5 }} />
                 <SideIconButton
-                  icon={"Ticket"}
+                  icon={"CoinSolid"}
                   text={"+5/hr"}
-                  color={THEME_COLORS.theme[400]}
+                  color={THEME_COLORS.green[500]}
                   height={36}
                   transparent
                 />

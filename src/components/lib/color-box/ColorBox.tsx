@@ -4,7 +4,7 @@ import { ThemeColor } from "../../../theme";
 
 export interface ColorBoxProps {
   color: ThemeColor;
-  width?: number;
+  width?: number | string;
   height?: number;
   pressable?: boolean;
   onPress?: () => void;

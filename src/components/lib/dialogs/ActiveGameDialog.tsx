@@ -5,6 +5,8 @@ import { RawMatch } from "../../../data/data.types";
 import ActiveGameCard from "../../game-button/ActiveGameCard";
 import DialogBanner from "./DialogBanner";
 import { THEME_COLORS } from "../../../theme";
+import TitleText from "../text/TitleText";
+import Icon from "../buttons/icon-button/Icon";
 
 type Props = {
   onCancel: () => void;
@@ -25,13 +27,17 @@ const ActiveGameDialog = ({
 }: Props) => {
   return (
     <View style={styles.container}>
-      <DialogBanner
+      <View style={styles.banner}>
+        <Icon name={config.icon} fill={config.color.color} />
+        <TitleText text={bannerText} size={30} color={config.color} />
+      </View>
+      {/* <DialogBanner
         bannerText={bannerText || "New Game"}
         bannerColor={THEME_COLORS.dark[200]}
         onClose={onCancel}
         titleFont
         iconColor={THEME_COLORS.dark[500]}
-      />
+      /> */}
       <ActiveGameCard
         config={config}
         game={game}
@@ -48,8 +54,13 @@ export default ActiveGameDialog;
 const styles = StyleSheet.create({
   container: {
     display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    paddingHorizontal: 20,
+    // flexDirection: "column",
+    // alignItems: "center",
+    // paddingHorizontal: 20,
+  },
+  banner: {
+    display: "flex",
+    width: "100%",
+    paddingBottom: 5,
   },
 });

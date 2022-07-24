@@ -1,6 +1,7 @@
 import { useQuery } from "react-query";
 import Config from "react-native-config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import APP_ENV from "../../env";
 
 export function authForm(token: string) {
   const form = new FormData();
@@ -15,8 +16,8 @@ export async function unauthPost(path: string, data: string[][]) {
     if (r.length == 2) form.append(r[0], r[1]);
   });
 
-  return await (
-    await fetch("http://192.168.0.104:8080/v1" + path, {
+  return await(
+    await fetch(APP_ENV.BACKEND_URL + path, {
       method: "post",
       body: form,
     })
@@ -24,7 +25,7 @@ export async function unauthPost(path: string, data: string[][]) {
 }
 
 export async function justGet(path: string) {
-  return await (await fetch("http://192.168.0.104:8080/v1" + path)).json();
+  return await(await fetch(APP_ENV.BACKEND_URL + path)).json();
 }
 
 export async function authPost(token: string, path: string, data?: string[][]) {
@@ -34,8 +35,8 @@ export async function authPost(token: string, path: string, data?: string[][]) {
       if (r.length == 2) form.append(r[0], r[1]);
     });
 
-  return await (
-    await fetch("http://192.168.0.104:8080/v1" + path, {
+  return await(
+    await fetch(APP_ENV.BACKEND_URL + path, {
       method: "post",
       body: form,
     })

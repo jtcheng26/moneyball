@@ -93,6 +93,7 @@ const MatchFoundNotifHandler = (props: Props) => {
 
   const config =
     notifs.length > 0 ? configFromCode[notifs[0].mode_id] : RankedMatchConfig;
+  console.log(notifs, props.modalReady);
   return (
     <DarkenedModal
       visible={props.modalReady && notifs && notifs.length > 0}
@@ -103,6 +104,7 @@ const MatchFoundNotifHandler = (props: Props) => {
           {notifType === NotificationCode.GAME_START && (
             <ActiveGameDialog
               game={notifs[0]}
+              bannerText={"MATCH FOUND"}
               config={config}
               onCancel={clearNotifs}
               onConfirm={(config: GameConfig, game?: RawMatch) => {

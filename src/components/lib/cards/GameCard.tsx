@@ -17,6 +17,7 @@ type Props = {
   centered?: boolean;
   noUnderline?: boolean;
   buttonTextSize?: number;
+  slim?: boolean;
 };
 
 const GameCard = (props: Props) => {
@@ -51,7 +52,7 @@ const GameCard = (props: Props) => {
           <ColorBox
             color={props.color}
             width={props.width}
-            height={props.height / 5}
+            height={props.slim ? 64 : props.height / 5}
             underline={!props.noUnderline}
             leftAlign={!props.centered}
           >

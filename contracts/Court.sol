@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import "./Token.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // ----------------------------------------------------------------------------
 // 'Moneyball Court' contract
@@ -12,9 +12,9 @@ import "./Token.sol";
 
 contract BallCourt {
 
-    address public BALLadmin;
+    address public BTTadmin; // for dev purposes, will switch to game contract in prod
     address public admin;
-    address public BALLaddress = 0x81ec4f121DBffa04729C03f2C81E7b54883c109B;
+    address public BTTaddress = 0xA0Fbd0cDDdE9fb2F91327f053448a0F3319552F7;
     mapping(address => bool) public gameAdmin;
     mapping(uint256 => mapping(uint256 => address)) public owner; // LAT, LONG
     uint256 public landPrice = 1000 * (10 ** 18);
@@ -22,23 +22,22 @@ contract BallCourt {
     // ------------------------------------------------------------------------
     // Constructor
     // ------------------------------------------------------------------------
-    constructor(address moneyAdmin, address adminAddr, address tokenAddress) {
+    constructor(address moneyAdmin, address adminAddr) {
         BALLadmin = moneyAdmin;
-        BALLaddress = tokenAddress;
         admin = adminAddr;
         gameAdmin[admin] = true;
     }
 
-    function _sendBALL(address spender, uint256 value) internal {
-        uint256 allowance = BallToken(BALLaddress).allowance(spender, address(this));
+    function _sendBTT(address spender, uint256 value) internal {
+        uint256 allowance = IERC20(BTTaddress).allowance(spender, address(this));
         require(allowance >= value, "Check the token allowance");
-        BallToken(BALLaddress).transferFrom(spender, BALLadmin, value);
+        IERC20(BTTaddress).transferFrom(spender, BTTadmin, value);
     }
 
     // initialize court
     function create(address user, uint256 lat, uint256 long) public {
         require(gameAdmin[msg.sender], "only admin can invoke this method");
-        _sendBALL(user, landPrice);
+        _sendBTT(user, landPrice);
         owner[lat][long] = user;
         // other attributes
     }

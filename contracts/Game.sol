@@ -6,7 +6,7 @@ import "./Trophy.sol";
 import "./Court.sol";
 
 // ----------------------------------------------------------------------------
-// 'Moneyball Game' contract
+// 'Moneyball Tickets' contract
 //
 // Deployed to : 
 
@@ -50,8 +50,7 @@ struct GameInstance {
 contract BallGame is SafeMath {
     string public name;
     address public admin = 0xA3D199F96535c98c716BbfD7F5A1A94FCB8170be;
-
-    address public TokenContract = 0x81ec4f121DBffa04729C03f2C81E7b54883c109B;
+    address public BTTaddress = 0xA0Fbd0cDDdE9fb2F91327f053448a0F3319552F7;
     BallTicket TicketContract;
     BallTrophy TrophyContract;
     BallCourt CourtContract;
@@ -68,9 +67,9 @@ contract BallGame is SafeMath {
     constructor() {
         name = "Moneyball Game";
         gameAdmin[admin] = true;
-        TicketContract = new BallTicket(admin, address(this), TokenContract);
+        TicketContract = new BallTicket(admin, address(this));
         TrophyContract = new BallTrophy(address(this));
-        CourtContract = new BallCourt(admin, address(this), TokenContract);
+        CourtContract = new BallCourt(admin, address(this));
     }
 
     function getCourtContract() public view returns (address) {
@@ -130,17 +129,17 @@ contract BallGame is SafeMath {
         return true;
     }
 
-    function _sendBALL(address spender, uint256 value) internal {
-        uint256 allowance = BallToken(TokenContract).allowance(spender, address(this));
+    function _sendBTT(address spender, uint256 value) internal {
+        uint256 allowance = IERC20(BTTaddress).allowance(spender, address(this));
         require(allowance >= value, "Check the token allowance");
-        BallToken(TokenContract).transferFrom(spender, admin, value);
+        IERC20(BTTaddress).transferFrom(spender, admin, value);
     }
 
 
-    function _sendBALLFrom(address spender, address to, uint256 value) internal {
-        uint256 allowance = BallToken(TokenContract).allowance(spender, address(this));
+    function _sendBTTFrom(address spender, address to, uint256 value) internal {
+        uint256 allowance = IERC20(BTTaddress).allowance(spender, address(this));
         require(allowance >= value, "Check the token allowance");
-        BallToken(TokenContract).transferFrom(spender, to, value);
+        IERC20(BTTaddress).transferFrom(spender, to, value);
     }
 
     function newChallengeGame(uint gameID, address challenger, uint256 price, uint lat, uint long, uint gameEnd) public payable returns (bool) {
@@ -151,8 +150,8 @@ contract BallGame is SafeMath {
         uint256 gameShare = price * (10 ** 18) - userShare;
 
         address owner = CourtContract.owner(lat, long);
-        _sendBALLFrom(challenger, owner, userShare);
-        _sendBALLFrom(challenger, admin, gameShare);
+        _sendBTTFrom(challenger, owner, userShare);
+        _sendBTTFrom(challenger, admin, gameShare);
 
         address[2] memory players = [challenger, owner];
 
@@ -245,7 +244,7 @@ contract BallGame is SafeMath {
             PrizeType prizeType = games[gameID].prize.prizeType;
             // win
             if (prizeType == PrizeType.TOKEN) {
-                BallToken(TokenContract).transfer(games[gameID].players[winner].addr, games[gameID].prize.amount * (10 ** 18));
+                IERC20(BTTaddress).transfer(games[gameID].players[winner].addr, games[gameID].prize.amount * (10 ** 18));
             } else if (prizeType == PrizeType.TROPHY) {
                 TrophyContract.awardTrophies(games[gameID].players[winner].addr, games[gameID].prize.amount);
                 TrophyContract.loseTrophies(games[gameID].players[loser].addr, games[gameID].loss.amount);

@@ -16,6 +16,7 @@ export enum GameCode {
   SOLO_PIG = "solo-pig",
   KOTC_CHALLENGE = "kotc-challenge",
   TICKET_EVENT = "ticket-event",
+  WAGER_MATCH = "wager-match",
 }
 // The logged in user
 // GET/SET
@@ -78,6 +79,7 @@ export interface RawMatch {
     trophies: number;
   }[];
   location?: LocationCoordinates;
+  prize?: number;
 }
 
 export interface RawPlayer {

@@ -70,7 +70,7 @@ const ActiveGameCard = ({
       <GameCard
         color={user.scored ? THEME_COLORS.dark[200] : config.color}
         width={big ? "100%" : 220}
-        height={big ? 340 : 250}
+        height={big ? 240 : 250}
         buttonText={user.scored ? "Waiting for opponent" : "Play"}
         pressable={!user.scored}
         onPress={() => {
@@ -78,6 +78,7 @@ const ActiveGameCard = ({
           else playGame();
         }}
         buttonTextSize={big ? 20 : undefined}
+        slim={big}
       >
         <View style={styles.center}>
           <RecapProfile
@@ -100,14 +101,16 @@ const ActiveGameCard = ({
             fontSize={big ? 34 : undefined}
             centerSize={big ? 18 : undefined}
           />
-          <View style={styles.entryFee}>
-            <Icon
-              name={config.icon}
-              fill={config.color.color}
-              width={big ? 64 : 50}
-              height={big ? 64 : 50}
-            />
-          </View>
+          {!big && (
+            <View style={styles.entryFee}>
+              <Icon
+                name={config.icon}
+                fill={config.color.color}
+                width={big ? 64 : 50}
+                height={big ? 64 : 50}
+              />
+            </View>
+          )}
         </View>
       </GameCard>
     </>

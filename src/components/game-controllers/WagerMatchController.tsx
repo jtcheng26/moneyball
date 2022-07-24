@@ -10,7 +10,6 @@ import useUserData from "../../hooks/useUserData";
 import { GameCode, MatchResults } from "../../data/data.types";
 import { GameControllerProps, SessionRecap } from "./SoloPracticeController";
 import sendSession from "../../hooks/api/score";
-import { RankedMatchConfig } from "../../configs/rankedMatchConfig";
 import { THEME_COLORS } from "../../theme";
 import LabelText from "../lib/text/LabelText";
 import SideIconButton from "../lib/buttons/side-icon-button/SideIconButton";
@@ -41,7 +40,7 @@ export function UILocationStylesOverlay(
   }
 }
 // controller handles all game UI and functionality, custom for each mode
-const RankedMatchController = ({
+const WagerMatchController = ({
   gameState,
   updateGameState,
   greenScore,
@@ -49,8 +48,8 @@ const RankedMatchController = ({
   endSession,
   orientation,
 }: GameControllerProps) => {
-  const GAME_DURATION = 300; // 5 minutes
-  const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
+  // const GAME_DURATION = 60; // 5 minutes
+  const [timePassed, settimePassed] = useState(0);
   // useEffect(() => {
   //   if (greenScore === 4)
   //     endSession({ make: greenScore, miss: redScore, time: timePassed });
@@ -59,11 +58,11 @@ const RankedMatchController = ({
   useEffect(() => {
     if (gameState === "RUNNING") {
       const timer = setInterval(() => {
-        if (timeLeft <= 0) {
+        if (greenScore + redScore >= 10) {
           updateGameState("FINISHED");
           clearInterval(timer);
         } else {
-          setTimeLeft(timeLeft - 1);
+          settimePassed(timePassed + 1);
         }
       }, 1000);
 
@@ -73,12 +72,12 @@ const RankedMatchController = ({
       const recap: SessionRecap = {
         make: greenScore,
         miss: redScore,
-        time: GAME_DURATION,
+        time: timePassed,
         mode: GameCode.RANKED_MATCH,
       };
       endSession(recap);
     }
-  }, [gameState, timeLeft]);
+  }, [gameState, timePassed]);
 
   function gameTitle(state: GameState) {
     switch (state) {
@@ -87,7 +86,7 @@ const RankedMatchController = ({
       case "READY":
         return "Press to Start";
       case "RUNNING":
-        return "Ranked Match";
+        return "Wager Match";
       case "FINISHED":
         return "Finished";
       default:
@@ -124,7 +123,7 @@ const RankedMatchController = ({
       <Scoreboard
         scores={[greenScore, redScore]}
         title={gameState === "STARTING" ? "Get Ready!" : gameTitle(gameState)}
-        timeLeft={gameState === "RUNNING" ? timeLeft : undefined}
+        timePassed={gameState === "RUNNING" ? timePassed : undefined}
         active={gameState !== "PREPARING"}
         underline
         pressable={gameState === "READY"}
@@ -133,19 +132,22 @@ const RankedMatchController = ({
       <View style={UILocationStylesOverlay(orientation)}>
         <SideIconButton
           // invert
-          icon="BallAndHoop"
+          icon="CoinStack"
           height={60}
-          color={THEME_COLORS.theme[500]}
+          color={THEME_COLORS.green[500]}
           transparent
-          size={26}
+          size={22}
+          text={` ${Math.max(0, 10 - (greenScore + redScore))} Shot${
+            greenScore + redScore === 9 ? "" : "s"
+          } Left`}
         />
       </View>
     </View>
     // </SafeAreaView> */}
   );
-};;;;;
+};
 
-export default RankedMatchController;
+export default WagerMatchController;
 
 const styles = StyleSheet.create({
   container: {

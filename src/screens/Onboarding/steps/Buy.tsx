@@ -30,20 +30,24 @@ const BuyStep = (props: Props) => {
       </View>
       <View style={styles.section}>
         <BodyText>
-          By winning matches, you can earn $BALL Tokens. $BALL Tokens are real
-          crypto that can be sold for real value!
+          By winning matches, you can earn BitTorrent Tokens (BTT). BTT is real
+          crypto that can be exchanged for real value!
         </BodyText>
       </View>
       <View style={styles.section}>
         <TokenButton value={1000000} big />
       </View>
       <View style={styles.section}>
-        <BodyText>Buy some tickets using $BTT to get started!</BodyText>
+        <BodyText>
+          Buy some tickets using BTT to get started! Note it might take some
+          time for the transaction to complete and you may need to reload the
+          app to see your Tickets.
+        </BodyText>
       </View>
       <View style={{ height: 30 }} />
       <PurchaseButton
-        amount={1000}
-        price={1000}
+        amount={500}
+        price={5000}
         currency="BTT"
         width="100%"
         onPurchase={props.onComplete}

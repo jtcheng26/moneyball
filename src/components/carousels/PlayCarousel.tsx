@@ -7,6 +7,7 @@ import { HorseMatchConfig } from "../../configs/horseMatchConfig";
 import GameButton from "../game-button/GameButton";
 import { GameConfig } from "../../configs/gameConfig.types";
 import { SoloPigConfig } from "../../configs/soloPigConfig";
+import { WagerMatchConfig } from "../../configs/wagerMatchConfig";
 
 type Props = {
   onPress: (config: GameConfig) => void;
@@ -18,9 +19,10 @@ const PlayCarousel = (props: Props) => {
       title="Play"
       data={[
         RankedMatchConfig,
-        SoloPracticeConfig,
+        WagerMatchConfig,
         HorseMatchConfig,
         SoloPigConfig,
+        SoloPracticeConfig,
       ]}
       renderItem={({ item, index }) => {
         return <GameButton config={item} onPress={() => props.onPress(item)} />;

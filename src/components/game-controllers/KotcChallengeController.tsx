@@ -25,7 +25,7 @@ const KotcChallengeController = ({
   orientation,
   location,
 }: GameControllerProps) => {
-  const GAME_DURATION = 20; // 5 minutes
+  const GAME_DURATION = 300; // 5 minutes
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
   const { upd } = useVisualCurrency();
   // useEffect(() => {
@@ -114,7 +114,7 @@ const KotcChallengeController = ({
     </View>
     // </SafeAreaView> */}
   );
-};
+};;;;
 
 export default KotcChallengeController;
 

@@ -7,6 +7,7 @@ import { RankedMatchConfig } from "./rankedMatchConfig";
 import { SoloPigConfig } from "./soloPigConfig";
 import { SoloPracticeConfig } from "./soloPracticeConfig";
 import { TicketEventConfig } from "./ticketEventConfig";
+import { WagerMatchConfig } from "./wagerMatchConfig";
 
 export interface GameConfig {
   name: string;
@@ -28,4 +29,5 @@ export const configFromCode: Record<GameCode, GameConfig> = {
   "solo-pig": SoloPigConfig,
   "kotc-challenge": KotcChallengeConfig,
   "ticket-event": TicketEventConfig,
+  "wager-match": WagerMatchConfig,
 };

@@ -1,5 +1,11 @@
-import { StyleSheet, Text, View } from "react-native";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import MapView, { Marker, LatLng, AnimatedRegion } from "react-native-maps";
 import mapStyle from "./style.json";
 import Icon from "../buttons/icon-button/Icon";
@@ -11,7 +17,9 @@ import {
   LocationCoordinates,
 } from "../../../data/data.types";
 import { useSharedValue } from "react-native-reanimated";
-import useCurrentLocation from "../../../hooks/useCurrentLocation";
+import useCurrentLocation, {
+  switchLocation,
+} from "../../../hooks/useCurrentLocation";
 import ReactNativeModal from "react-native-modal";
 import CourtCarousel from "../../carousels/CourtCarousel";
 import { useWalletConnect } from "@walletconnect/react-native-dapp";
@@ -38,7 +46,20 @@ const Map = (props: Props) => {
   const ref = useRef();
   const { data: courts, isSuccess: courtsLoaded } = useLocations();
   const [selectedIdx, setSelectedIdx] = useState(0);
-  const loc = useCurrentLocation();
+  const [loc, setLoc] = useState({
+    latitude: 34.074, // hitch
+    longitude: -118.4539, // hitch
+    // latitude: 34.0695, // ostin
+    // longitude: -118.448, // ostin
+  });
+  useEffect(() => {
+    (async () => {
+      setLoc(await useCurrentLocation());
+    })();
+  }, []);
+  async function switchLoc() {
+    setLoc(await switchLocation());
+  }
   const distance = useCallback(
     (coords: LocationCoordinates) => {
       const dx = coords.latitude - loc.latitude;
@@ -203,6 +224,18 @@ const Map = (props: Props) => {
           </View>
         </Marker>
       </MapView>
+      <Pressable
+        style={{
+          position: "absolute",
+          top: 100,
+          left: 20,
+          width: 100,
+          height: 100,
+          backgroundColor: "#00000000",
+        }}
+        onPress={switchLoc}
+      />
+
       <DarkenedModal visible={!!results} onDismiss={closeResultModal}>
         {gameConfig === KotcChallengeConfig ? (
           <KotcChallengeResultDialog
@@ -210,14 +243,14 @@ const Map = (props: Props) => {
             win={true} // temp
             onCancel={closeResultModal}
             userID={conn.accounts[0]}
-            score={10}
+            score={results ? results.make : 0}
           />
         ) : (
           <TicketEventResultDialog
             location={gameMarker}
             onCancel={closeResultModal}
             userID={conn.accounts[0]}
-            score={10}
+            score={results ? results.make : 0}
           />
         )}
       </DarkenedModal>

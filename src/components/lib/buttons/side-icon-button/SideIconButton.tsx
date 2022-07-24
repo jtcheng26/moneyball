@@ -16,6 +16,7 @@ type Props = {
   onPress?: () => void;
   transparent?: boolean;
   size?: number;
+  width?: number;
 };
 
 const SideIconButton = (props: Props) => {
@@ -32,8 +33,8 @@ const SideIconButton = (props: Props) => {
       {!props.transparent ? (
         <ColorBox
           color={props.color}
-          flex
-          width={50}
+          flex={!props.width}
+          width={props.width ? props.width : 50}
           height={props.height}
           leftAlign
           underline={props.underline}

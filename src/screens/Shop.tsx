@@ -20,21 +20,21 @@ const Shop = (props: Props) => {
             <View style={{ height: 20 }} />
             <PurchaseButton
               amount={100}
-              price={50000}
-              currency="BALL"
+              price={1000}
+              currency="BTT"
               width="100%"
               onPurchase={() => {
-                upd({ tokens: -50000, tix: 100 });
+                upd({ tix: 100, tokens: -1000 });
               }}
             />
             <View style={{ height: 40 }} />
             <PurchaseButton
               amount={1000}
-              price={1000}
+              price={10000}
               currency="BTT"
               width="100%"
               onPurchase={() => {
-                upd({ tix: 1000 });
+                upd({ tix: 1000, tokens: -10000 });
               }}
             />
           </PaddedView>

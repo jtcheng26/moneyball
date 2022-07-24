@@ -44,6 +44,7 @@ import BuyStep from "./steps/Buy";
 import ScrollScreen from "../../components/lib/spacing/ScrollScreen";
 import FadeHeader from "../../components/lib/spacing/FadeHeader";
 import LoadingScreen from "../LoadingScreen";
+import APP_ENV from "../../../env";
 
 export default function Login() {
   const tw = useTailwind();
@@ -61,6 +62,8 @@ export default function Login() {
 
   let count = 0;
 
+  // connector.killSession();
+
   useEffect(() => {
     if (connector.connected) {
       (async () => {
@@ -69,12 +72,9 @@ export default function Login() {
           sessionToken || "",
           connector.accounts[0]
         );
-        console.log(valid);
         // get new token if signed into new account
         if (!valid["valid"]) {
-          const res = await (
-            await fetch("http://192.168.0.104:8080/v1/auth")
-          ).json();
+          const res = await (await fetch(APP_ENV.BACKEND_URL + "/auth")).json();
           const signed = await connector.signPersonalMessage([
             res["session"],
             connector.accounts[0],

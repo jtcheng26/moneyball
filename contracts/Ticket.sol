@@ -36,10 +36,8 @@ contract BallTicket is SafeMath {
     string public  name;
     address public admin;
     address public BTTadmin;
-    address public BALLaddress;
     address public BTTaddress = 0xA0Fbd0cDDdE9fb2F91327f053448a0F3319552F7;
-    uint public tixPriceBTT = 1; // BTT conversion price
-    uint public tixPriceBALL = 500 * (10 ** 18); // BALL price
+    uint public tixPriceBTT = 10 * (10 ** 18); // BTT conversion price
 
     mapping(address => uint) balances;
     mapping(address => mapping(address => uint)) allowed;
@@ -49,9 +47,8 @@ contract BallTicket is SafeMath {
     // ------------------------------------------------------------------------
     // Constructor
     // ------------------------------------------------------------------------
-    constructor(address adminMoney, address adminAddr, address tokenAddress) {
+    constructor(address adminMoney, address adminAddr) {
         name = "Moneyball Tickets";
-        BALLaddress = tokenAddress;
         BTTadmin = adminMoney;
         admin = adminAddr;
         gameAdmin[admin] = true;
@@ -100,23 +97,6 @@ contract BallTicket is SafeMath {
 
     function buyTicketsWithBTT(uint256 tickets) public {
        _sendBTT(msg.sender, tickets * tixPriceBTT);
-
-       balances[msg.sender] = safeAdd(balances[msg.sender], tickets);
-    }
-
-    // ------------------------------------------------------------------------
-    // Buy tickets with game token (BALL)
-    //  BALL is earned by playing
-    //  Ideally more efficient than fixed-price BTTC purchase
-    // ------------------------------------------------------------------------
-    function _sendBALL(address spender, uint256 value) internal {
-        uint256 allowance = IERC20(BALLaddress).allowance(msg.sender, address(this));
-        require(allowance >= value, "Check the token allowance");
-        IERC20(BALLaddress).transferFrom(spender, BTTadmin, value);
-    }
-
-    function buyTicketsWithBALL(uint256 tickets) public {
-       _sendBALL(msg.sender, tickets * tixPriceBALL);
 
        balances[msg.sender] = safeAdd(balances[msg.sender], tickets);
     }

@@ -11,6 +11,7 @@ import TicketText from "../lib/text/TicketText";
 import GameConfirmDialog from "../lib/dialogs/GameConfirmDialog";
 import DarkenedModal from "../lib/dialogs/DarkenedModal";
 import GameRequestDialog from "../lib/dialogs/GameRequestDialog";
+import { GameCode } from "../../data/data.types";
 
 type Props = {
   config: GameConfig;
@@ -35,7 +36,11 @@ const GameButton = ({ config, onPress }: Props) => {
           height={100}
         />
         <View style={styles.entryFee}>
-          <TicketText entryFee={config.entryFee} />
+          <TicketText
+            entryFee={
+              config.id === GameCode.WAGER_MATCH ? "50+" : config.entryFee
+            }
+          />
         </View>
       </View>
     </GameCard>

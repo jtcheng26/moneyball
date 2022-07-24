@@ -20,11 +20,12 @@ import { tokenABI } from "../../hooks/api/tokenABI";
 import { useWalletConnect } from "@walletconnect/react-native-dapp";
 import useUserData from "../../hooks/useUserData";
 import useTickets from "../../hooks/useTickets";
+import APP_ENV from "../../../env";
 
 type Props = {
   amount: number;
   price: number;
-  currency: "BTT" | "BALL";
+  currency: "BTT"; // in case custom token in future
   width?: number | string;
   onPurchase?: () => void;
 };
@@ -49,7 +50,7 @@ const PurchaseButton = ({
         if (!connector.connected) return false;
         const provide = new WalletConnectProvider({
           rpc: {
-            5: "https://goerli.infura.io/v3/14dd41f30d274433a4bd818422e079b5",
+            5: APP_ENV.RPC_PROVIDER,
             // ...
           },
           chainId: 5,
@@ -64,61 +65,29 @@ const PurchaseButton = ({
 
         const ethers_provider = new ethers.providers.Web3Provider(provide);
         const signer = ethers_provider.getSigner();
-        // const contr = new ethers.Contract(
-        //   "0xA0Fbd0cDDdE9fb2F91327f053448a0F3319552F7",
-        //   tokenABI,
-        //   ethers_provider
-        // );
-        const contr2 = new ethers.Contract(
-          "0x88E49F80e9799Be6E400EdF90adA244C15feB1F0",
+        const contr = new ethers.Contract(
+          APP_ENV.TICKET_CONTRACT,
           ticketABI,
           ethers_provider
         );
-        // const conn = contr.connect(signer);
-        const conn2 = contr2.connect(signer);
-        // await conn.functions
-        //   .approve(
-        //     "0x6841e5c93DdFDe42D0d6B6bf7F1fE45207dB21c0",
-        //     ethers.BigNumber.from("1000000000000000000000")
-        //   )
-        //   .catch((err) => {
-        //     console.error(err);
-        //   })
-        //   .then((res) => {
-        //     console.log(res);
-        //   });
+        const conn = contr.connect(signer);
 
-        if (currency === "BTT") {
-          conn2.functions
-            .buyTicketsWithBTT(
-              // await signer.getAddress(),
-              amount
-            )
-            .catch((err) => {
-              console.error(err);
-              clearInterval(keepAlive);
-              resolve(false);
-            })
-            .then((r) => {
-              clearInterval(keepAlive);
-              resolve(true);
-            });
-        } else {
-          conn2.functions
-            .buyTicketsWithBALL(
-              // await signer.getAddress(),
-              amount
-            )
-            .catch((err) => {
-              clearInterval(keepAlive);
-              console.error(err);
-              resolve(false);
-            })
-            .then((r) => {
-              clearInterval(keepAlive);
-              resolve(true);
-            });
-        }
+        // if (currency === "BTT") {
+        conn.functions
+          .buyTicketsWithBTT(
+            // await signer.getAddress(),
+            amount
+          )
+          .catch((err) => {
+            console.error(err);
+            clearInterval(keepAlive);
+            resolve(false);
+          })
+          .then((r) => {
+            clearInterval(keepAlive);
+            resolve(true);
+          });
+        // }
       } catch (err) {
         console.error(err);
       }
@@ -145,7 +114,9 @@ const PurchaseButton = ({
       </DarkenedModal>
       <DarkenedModal
         visible={successModal}
-        onDismiss={() => setSuccessModal(false)}
+        onDismiss={() => {
+          setSuccessModal(false);
+        }}
       >
         <SuccessDialog
           title="Purchase Successful!"
