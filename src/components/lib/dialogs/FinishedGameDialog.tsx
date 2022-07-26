@@ -15,7 +15,7 @@ type Props = {
   config: GameConfig;
   game?: RawMatch;
   bannerText?: string;
-  onSave: (matches: RawMatch[]) => void;
+  onSave: () => void;
   userID: string;
   onPress: (config: GameConfig, result: MatchResults) => void;
 };
@@ -35,7 +35,7 @@ const FinishedGameDialog = ({
       (async () => {
         const res = await saveRawMatch(game, userID);
         setResult(res);
-        onSave([]);
+        onSave();
       })();
     }
   }, [game]);
@@ -102,12 +102,13 @@ const FinishedGameDialog = ({
         <GameResult
           result={result}
           prize={
-            config.id === GameCode.HORSE_MATCH ||
-            config.id === GameCode.WAGER_MATCH
+            config.id === GameCode.WAGER_MATCH && won
               ? game?.prize
-              : config.id === GameCode.RANKED_MATCH
+              : config.id === GameCode.HORSE_MATCH && won
               ? 100
-              : undefined
+              : won && config.id === GameCode.RANKED_MATCH
+              ? 100
+              : 0
           }
           config={config}
           big

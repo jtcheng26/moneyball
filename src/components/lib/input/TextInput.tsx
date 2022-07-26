@@ -1,6 +1,6 @@
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import React, { useState } from "react";
-import { THEME_COLORS } from "../../../theme";
+import { ThemeColor, THEME_COLORS } from "../../../theme";
 import { useFonts } from "@expo-google-fonts/montserrat";
 import { FiraCode_400Regular } from "@expo-google-fonts/fira-code";
 import LabelText from "../text/LabelText";
@@ -9,6 +9,10 @@ import BodyText from "../text/BodyText";
 type Props = {
   text: string;
   onChange: (text: string) => void;
+  bgColor?: ThemeColor;
+  label?: string;
+  placeholder?: string;
+  compact?: boolean;
 };
 
 const TextInputBox = (props: Props) => {
@@ -16,13 +20,28 @@ const TextInputBox = (props: Props) => {
     FiraCode_400Regular,
   });
   return fontsLoaded ? (
-    <View style={styles.container}>
-      <BodyText color={THEME_COLORS.dark[200]}>Name</BodyText>
+    <View
+      style={{
+        marginBottom: props.compact ? 10 : 20,
+      }}
+    >
+      <BodyText color={THEME_COLORS.dark[200]}>
+        {props.label ? props.label : "Name"}
+      </BodyText>
       <TextInput
-        style={styles.input}
+        clearTextOnFocus
+        style={[
+          styles.input,
+          {
+            backgroundColor: props.bgColor
+              ? props.bgColor.color
+              : THEME_COLORS.dark[500].color,
+            height: props.compact ? 40 : 60,
+          },
+        ]}
         onChangeText={props.onChange}
         value={props.text}
-        placeholder="Type here..."
+        placeholder={props.placeholder || "Type here..."}
         placeholderTextColor={THEME_COLORS.dark[200].color}
       />
     </View>
@@ -34,14 +53,9 @@ const TextInputBox = (props: Props) => {
 export default TextInputBox;
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 20,
-  },
   input: {
     marginTop: 5,
-    height: 60,
-    width: "100%",
-    backgroundColor: THEME_COLORS.dark[500].color,
+    // width: "100%",
     fontFamily: "FiraCode_400Regular",
     fontSize: 15,
     paddingHorizontal: 15,

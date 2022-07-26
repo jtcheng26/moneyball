@@ -5,8 +5,10 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 // ----------------------------------------------------------------------------
 // 'Moneyball Tickets' contract
 //
-// Deployed to : 
-
+// Deployed to: 0x3df3D38806778422b39b49ef8E5D2CDC47C3334B
+// Deployed on ETH Goerli Testnet using the mapped BTT asset because Metamask mobile has issues with custom RPC providers.
+// Other actual game contracts are deployed on BTTC.
+// Tickets are verified server-side for the time being until Metamask fixes their problem.
 // ----------------------------------------------------------------------------
 
 
@@ -47,10 +49,10 @@ contract BallTicket is SafeMath {
     // ------------------------------------------------------------------------
     // Constructor
     // ------------------------------------------------------------------------
-    constructor(address adminMoney, address adminAddr) {
+    constructor(address adminMoney) {
         name = "Moneyball Tickets";
         BTTadmin = adminMoney;
-        admin = adminAddr;
+        admin = adminMoney;
         gameAdmin[admin] = true;
     }
 
@@ -70,7 +72,6 @@ contract BallTicket is SafeMath {
     function spendTickets(address spender, uint tickets) public returns (bool success) {
         require(gameAdmin[msg.sender], "Only game admin can spend.");
         balances[spender] = safeSub(balances[spender], tickets);
-        balances[admin] = safeAdd(balances[admin], tickets);
         return true;
     }
 

@@ -8,12 +8,14 @@ import GameButton from "../game-button/GameButton";
 import { GameConfig } from "../../configs/gameConfig.types";
 import { SoloPigConfig } from "../../configs/soloPigConfig";
 import { WagerMatchConfig } from "../../configs/wagerMatchConfig";
+import useVisualCurrency from "../../hooks/useVisual";
 
 type Props = {
   onPress: (config: GameConfig) => void;
 };
 
 const PlayCarousel = (props: Props) => {
+  const { tix } = useVisualCurrency();
   return (
     <CardCarousel
       title="Play"
@@ -25,7 +27,13 @@ const PlayCarousel = (props: Props) => {
         SoloPracticeConfig,
       ]}
       renderItem={({ item, index }) => {
-        return <GameButton config={item} onPress={() => props.onPress(item)} />;
+        return (
+          <GameButton
+            config={item}
+            onPress={() => props.onPress(item)}
+            disabled={tix < item.entryFee}
+          />
+        );
       }}
     />
   );

@@ -16,6 +16,9 @@ import ActiveGameDialog from "../lib/dialogs/ActiveGameDialog";
 import { saveRawMatch } from "../../data/saveGame";
 import { useWalletConnect } from "@walletconnect/react-native-dapp";
 import FinishedGameDialog from "../lib/dialogs/FinishedGameDialog";
+import LabelText from "../lib/text/LabelText";
+import IconButton from "../lib/buttons/icon-button/IconButton";
+import { THEME_COLORS } from "../../theme";
 
 type Props = {
   onNotif: (match: RawMatch, notifType: NotificationCode) => void;
@@ -61,15 +64,12 @@ type Props = {
 // ]`);
 
 const MatchFoundNotifHandler = (props: Props) => {
-  const [notifs, setNotifs] = useState<RawMatch[]>([]);
+  const [notifs, setNotifs] = useState<RawNotification[]>([]);
   const { data: rawNotifs } = useNotifs();
-  const [notifType, setNotifType] = useState<NotificationCode>(
-    NotificationCode.GAME_START
-  );
 
   const onGameFound = useCallback(
-    (matches: RawMatch[], notifType: NotificationCode) => {
-      if (matches.length > 0) props.onNotif(matches[0], notifType);
+    (match: RawMatch, notifType: NotificationCode) => {
+      props.onNotif(match, notifType);
     },
     [props.onNotif]
   );
@@ -80,52 +80,87 @@ const MatchFoundNotifHandler = (props: Props) => {
 
   const conn = useWalletConnect();
 
+  const nextNotif = useCallback(() => {
+    if (notifs.length >= 1) setNotifs(notifs.slice(1));
+  }, [notifs]);
+
   useEffect(() => {
     if (rawNotifs && rawNotifs.length > 0) {
-      const processed = rawNotifs
-        .filter((notif: RawNotification) => notif.code === rawNotifs[0]["code"])
-        .map((notif: RawNotification) => notif.data as RawMatch);
-      setNotifType(rawNotifs[0]["code"]);
-      setNotifs(processed);
-      onGameFound(processed, rawNotifs[0]["code"]);
+      // const processed = rawNotifs
+      // .filter((notif: RawNotification) => notif.code === rawNotifs[0]["code"])
+      // .map((notif: RawNotification) => notif.data as RawMatch);
+      setNotifs(notifs.concat(rawNotifs));
     }
   }, [rawNotifs]);
 
-  const config =
-    notifs.length > 0 ? configFromCode[notifs[0].mode_id] : RankedMatchConfig;
-  console.log(notifs, props.modalReady);
+  const notifType = useMemo(() => {
+    return notifs && notifs.length > 0
+      ? notifs[0].code
+      : NotificationCode.GAME_START;
+  }, [notifs]);
+
+  useMemo(() => {
+    if (notifs && notifs.length > 0) {
+      setTimeout(() => {
+        onGameFound(notifs[0].data, notifs[0].code);
+      }, 400);
+    }
+  }, [notifs]);
+
+  const config = useMemo(
+    () =>
+      notifs.length > 0
+        ? configFromCode[notifs[0].data.mode_id]
+        : RankedMatchConfig,
+    [notifs]
+  );
+
   return (
     <DarkenedModal
       visible={props.modalReady && notifs && notifs.length > 0}
-      onDismiss={clearNotifs}
+      onDismiss={nextNotif}
     >
       {notifs && notifs.length > 0 && (
         <>
-          {notifType === NotificationCode.GAME_START && (
+          {notifType === NotificationCode.GAME_START ? (
             <ActiveGameDialog
-              game={notifs[0]}
+              game={notifs[0].data}
               bannerText={"MATCH FOUND"}
               config={config}
               onCancel={clearNotifs}
               onConfirm={(config: GameConfig, game?: RawMatch) => {
-                clearNotifs();
+                nextNotif();
                 props.startGame(config, game);
               }}
               userID={conn.accounts[0]}
             />
-          )}
-          {notifType === NotificationCode.GAME_END && (
+          ) : notifType === NotificationCode.GAME_END ? (
             <FinishedGameDialog
-              game={notifs[0]}
+              game={notifs[0].data}
               config={config}
               onCancel={clearNotifs}
-              onSave={onGameFound}
+              onSave={() => {
+                // setTimeout(() => {
+                //   onGameFound(notifs[0].data, notifs[0].code);
+                // }, 400);
+              }}
               userID={conn.accounts[0]}
               onPress={(config: GameConfig, result: MatchResults) => {
-                clearNotifs();
+                nextNotif();
                 props.showRecent(config, result);
               }}
             />
+          ) : notifs.length > 1 ? (
+            <View style={{ marginTop: 10 }}>
+              <LabelText
+                text={`${notifs.length - 1} more notification${
+                  notifs.length === 2 ? "" : "s"
+                }`}
+                color={THEME_COLORS.dark[200]}
+              />
+            </View>
+          ) : (
+            <View />
           )}
         </>
       )}

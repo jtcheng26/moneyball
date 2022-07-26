@@ -5,8 +5,8 @@ import "./Ticket.sol";
 // ----------------------------------------------------------------------------
 // 'Moneyball Trophies' contract
 //
-// Deployed to : 
-
+// Deployed to: 0x087fbA321f576f6ddd6Bc6aCEaaE48264ef688Ab
+// Deployed on BTTC Testnet Donau
 // ----------------------------------------------------------------------------
 
 contract BallTrophy is SafeMath {

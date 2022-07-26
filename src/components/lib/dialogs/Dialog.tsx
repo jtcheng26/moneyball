@@ -17,6 +17,7 @@ type Props = {
   onClose?: () => void;
   bannerText?: string;
   bannerColor?: ThemeColor;
+  noMargin?: boolean;
 };
 
 const Dialog = (props: Props) => {
@@ -49,7 +50,9 @@ const Dialog = (props: Props) => {
           {props.body && (
             <BodyText color={THEME_COLORS.dark[50]}>{props.body}</BodyText>
           )}
-          <View style={{ marginTop: 50 }}>{props.children}</View>
+          <View style={{ marginTop: props.noMargin ? 0 : 50 }}>
+            {props.children}
+          </View>
         </View>
       </ColorBox>
     </View>

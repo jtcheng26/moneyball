@@ -6,6 +6,7 @@ import TitleText from "../components/lib/text/TitleText";
 import PaddedView from "../components/lib/spacing/PaddedView";
 import PurchaseButton from "../components/purchase/PurchaseButton";
 import useVisualCurrency from "../hooks/useVisual";
+import PurchaseLand from "../components/purchase/PurchaseLand";
 
 type Props = {};
 
@@ -35,6 +36,14 @@ const Shop = (props: Props) => {
               width="100%"
               onPurchase={() => {
                 upd({ tix: 1000, tokens: -10000 });
+              }}
+            />
+            <View style={{ height: 40 }} />
+            <PurchaseLand
+              price={1000}
+              width="100%"
+              onPurchase={() => {
+                upd({ tokens: -1000 });
               }}
             />
           </PaddedView>

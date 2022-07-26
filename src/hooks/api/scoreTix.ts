@@ -5,7 +5,5 @@ import { authPost } from "../useAuth";
 export default async function scoreTix(score: number) {
   const sessionToken = await AsyncStorage.getItem("EAGLE_SESSION_TOKEN");
   if (sessionToken)
-    await authPost(sessionToken, "/play/private/kotc/tix", [
-      ["score", score + ""],
-    ]);
+    authPost(sessionToken, "/play/private/kotc/tix", [["score", score + ""]]);
 }

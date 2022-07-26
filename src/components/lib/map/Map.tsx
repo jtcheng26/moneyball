@@ -32,6 +32,7 @@ import { KotcChallengeConfig } from "../../../configs/kotcChallengeConfig";
 import TicketEventResultDialog from "../dialogs/TicketEventResultDialog";
 import { TicketEventConfig } from "../../../configs/ticketEventConfig";
 import useVisualCurrency from "../../../hooks/useVisual";
+import { useRefetchOnFocus } from "../../../hooks/useRefetchOnFocus";
 // import { useAnimatedProps } from "react-native-reanimated";
 
 type Props = {
@@ -44,7 +45,12 @@ type Props = {
 const Map = (props: Props) => {
   // const loc = useAnimatedProps()
   const ref = useRef();
-  const { data: courts, isSuccess: courtsLoaded } = useLocations();
+  const { data: courts, isSuccess: courtsLoaded, refetch } = useLocations();
+
+  const rf = useCallback(() => {
+    refetch();
+  }, []);
+  useRefetchOnFocus(rf);
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [loc, setLoc] = useState({
     latitude: 34.074, // hitch
@@ -132,7 +138,9 @@ const Map = (props: Props) => {
   }
   function endGame(recap?: SessionRecap) {
     setAnimateClose(false);
+    console.log("close");
     setTimeout(() => {
+      console.log("game");
       setGame(false);
       if (gameMarker && !recap) props.onMarkerPress(gameMarker);
       else if (!!recap) {

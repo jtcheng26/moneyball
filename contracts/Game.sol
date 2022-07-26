@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import "./Token.sol";
 import "./Ticket.sol";
 import "./Trophy.sol";
 import "./Court.sol";
 
 // ----------------------------------------------------------------------------
-// 'Moneyball Tickets' contract
+// 'Moneyball Game' contract
 //
-// Deployed to : 
+// Deployed to: 0xeb0EFA85e5802AFA7159134f0DD5C25C42707863
+// Deployed on BTTC Testnet Donau
 
 // ----------------------------------------------------------------------------
 
@@ -50,8 +50,6 @@ struct GameInstance {
 contract BallGame is SafeMath {
     string public name;
     address public admin = 0xA3D199F96535c98c716BbfD7F5A1A94FCB8170be;
-    address public BTTaddress = 0xA0Fbd0cDDdE9fb2F91327f053448a0F3319552F7;
-    BallTicket TicketContract;
     BallTrophy TrophyContract;
     BallCourt CourtContract;
 
@@ -67,7 +65,6 @@ contract BallGame is SafeMath {
     constructor() {
         name = "Moneyball Game";
         gameAdmin[admin] = true;
-        TicketContract = new BallTicket(admin, address(this));
         TrophyContract = new BallTrophy(address(this));
         CourtContract = new BallCourt(admin, address(this));
     }
@@ -78,10 +75,6 @@ contract BallGame is SafeMath {
 
     function getTrophyContract() public view returns (address) {
         return address(TrophyContract);
-    }
-    
-    function getTicketContract() public view returns (address) {
-        return address(TicketContract);
     }
 
     function getGame(uint gameID) public view returns (GameInstance memory) {
@@ -95,9 +88,6 @@ contract BallGame is SafeMath {
     function newGame(uint gameID, address[] memory players, uint[] memory ticketsPaid, uint prize, uint prizeType, uint loss, uint gameEnd) public payable returns (bool) {
         emit GameRequest(gameID, players, ticketsPaid, prize, prizeType, loss, gameEnd);
         require(gameAdmin[msg.sender], "Only admin can start games.");
-        for (uint i=0;i<players.length;i++) {
-            require(TicketContract.balanceOf(players[i]) >= ticketsPaid[i], "Balance not enough for all players.");
-        }
 
         emit GameRequest(gameID, players, ticketsPaid, prize, prizeType, loss, gameEnd);
 
@@ -107,7 +97,6 @@ contract BallGame is SafeMath {
             games[gameID].scores[i].score = 0;
             games[gameID].scores[i].scored = false;
             emit GameRequest(gameID, players, ticketsPaid, prize, prizeType, loss, gameEnd);
-            TicketContract.spendTickets(players[i], ticketsPaid[i]);
         }
         games[gameID].prize.amount = prize;
         games[gameID].loss.amount = loss;
@@ -129,17 +118,9 @@ contract BallGame is SafeMath {
         return true;
     }
 
-    function _sendBTT(address spender, uint256 value) internal {
-        uint256 allowance = IERC20(BTTaddress).allowance(spender, address(this));
-        require(allowance >= value, "Check the token allowance");
-        IERC20(BTTaddress).transferFrom(spender, admin, value);
-    }
 
-
-    function _sendBTTFrom(address spender, address to, uint256 value) internal {
-        uint256 allowance = IERC20(BTTaddress).allowance(spender, address(this));
-        require(allowance >= value, "Check the token allowance");
-        IERC20(BTTaddress).transferFrom(spender, to, value);
+    function _sendBTT(address to, uint256 value) internal {
+        payable(to).transfer(value);
     }
 
     function newChallengeGame(uint gameID, address challenger, uint256 price, uint lat, uint long, uint gameEnd) public payable returns (bool) {
@@ -150,8 +131,8 @@ contract BallGame is SafeMath {
         uint256 gameShare = price * (10 ** 18) - userShare;
 
         address owner = CourtContract.owner(lat, long);
-        _sendBTTFrom(challenger, owner, userShare);
-        _sendBTTFrom(challenger, admin, gameShare);
+        _sendBTT(owner, userShare);
+        _sendBTT(admin, gameShare);
 
         address[2] memory players = [challenger, owner];
 
@@ -201,11 +182,6 @@ contract BallGame is SafeMath {
         _settleIfFinished(gameID);
     }
 
-    function scoreTickets(address player, uint256 tickets) public {
-        require(gameAdmin[msg.sender], "Only admin can award.");
-        TicketContract.earnTickets(player, tickets);
-    }
-
     function _settleIfFinished(uint gameID) internal {
         bool done = true;
         for (uint i=0;i<2;i++) {
@@ -234,23 +210,17 @@ contract BallGame is SafeMath {
 
         if (winner == 2) {
             // tie
-            if (games[gameID].prize.prizeType != PrizeType.LAND) {
-                BallTicket(TicketContract).earnTickets(games[gameID].players[0].addr, games[gameID].ticketsPaid[0]);
-                BallTicket(TicketContract).earnTickets(games[gameID].players[1].addr, games[gameID].ticketsPaid[1]);
-            }
             // challenger always gives up fee, even if tie
 
         } else {
             PrizeType prizeType = games[gameID].prize.prizeType;
             // win
             if (prizeType == PrizeType.TOKEN) {
-                IERC20(BTTaddress).transfer(games[gameID].players[winner].addr, games[gameID].prize.amount * (10 ** 18));
+                // games[gameID].players[winner].addr.transfer(games[gameID].prize.amount * (10 ** 18));
+                // will update when Metamask fixes/switch to mainnet, pay BTT_e on server for now
             } else if (prizeType == PrizeType.TROPHY) {
                 TrophyContract.awardTrophies(games[gameID].players[winner].addr, games[gameID].prize.amount);
                 TrophyContract.loseTrophies(games[gameID].players[loser].addr, games[gameID].loss.amount);
-            } else if (prizeType == PrizeType.TICKET) {
-                TicketContract.earnTickets(games[gameID].players[winner].addr, games[gameID].prize.amount);
-                TicketContract.spendTickets(games[gameID].players[loser].addr, games[gameID].loss.amount);
             } else if (prizeType == PrizeType.LAND) {
                 CourtContract.setOwner(games[gameID].players[winner].addr, games[gameID].lat, games[gameID].long);
             }

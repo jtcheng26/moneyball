@@ -59,7 +59,7 @@ export default function Play() {
   const [matching, setMatching] = useState(false);
   const [recapGame, setRecapGame] = useState<MatchResults>();
   function playGame(fee?: number) {
-    setShowModal(false);
+    closeModal();
     if (gameConfig.numPlayers == 1) startGame(gameConfig);
     else {
       onMatching(gameConfig.id, fee);
@@ -124,21 +124,24 @@ export default function Play() {
   }, [auth]);
   useRefetchOnFocus(cb);
 
-  function startGame(config: GameConfig, activeGame?: RawMatch) {
-    setShowModal(false);
-    setGameConfig(config);
-    setActiveGame(activeGame);
-    setTimeout(() => {
-      setAnimateClose(true);
-      setGame(true);
-    }, 500);
-  }
+  const startGame = useCallback(
+    (config: GameConfig, activeGame?: RawMatch) => {
+      setShowModal(false);
+      setGameConfig(config);
+      setActiveGame(activeGame);
+      setTimeout(() => {
+        setAnimateClose(true);
+        setGame(true);
+      }, 700);
+    },
+    [activeGame]
+  );
 
   function endGame(gameID: string = "") {
     setShowNotif(false);
     setAnimateClose(false);
     setTimeout(() => {
-      setShowNotif(true)
+      setShowNotif(true);
       refetch();
       setGame(false);
       refetchRecent();
@@ -190,39 +193,42 @@ export default function Play() {
     [scrollRef, pendingGames]
   );
 
-  function onMatchFound(match: RawMatch, notifType: NotificationCode) {
-    setPendingGames([]); // TODO: delete the actual pending game instead of all
-    refetch();
-    if (notifType === NotificationCode.GAME_START) {
-      if (match.mode_id === GameCode.WAGER_MATCH) {
-        upd({ tix: -1 * wagerFee });
-      } else {
-        upd({ tix: -50 }); // temp
+  const onMatchFound = useCallback(
+    (match: RawMatch, notifType: NotificationCode) => {
+      setPendingGames([]); // TODO: delete the actual pending game instead of all
+      refetch();
+      if (notifType === NotificationCode.GAME_START) {
+        if (match.mode_id === GameCode.WAGER_MATCH) {
+          upd({ tix: -1 * wagerFee });
+        } else {
+          upd({ tix: -50 }); // temp
+        }
+      } else if (notifType === NotificationCode.GAME_END) {
+        const p =
+          match.players[0].id.toLowerCase() === conn.accounts[0].toLowerCase()
+            ? 0
+            : 1;
+        const o = p === 0 ? 1 : 0;
+        if (match.players[p].score > match.players[o].score) {
+          if (match.mode_id === GameCode.RANKED_MATCH) upd({ trophies: 100 });
+          else if (match.mode_id === GameCode.HORSE_MATCH) upd({ tokens: 600 });
+          else if (match.mode_id === GameCode.WAGER_MATCH)
+            upd({ tokens: match.prize ? match.prize : 0 });
+        } else if (match.players[p].score === match.players[o].score)
+          upd({ tix: 50 });
       }
-    } else if (notifType === NotificationCode.GAME_END) {
-      const p =
-        match.players[0].id.toLowerCase() === conn.accounts[0].toLowerCase()
-          ? 0
-          : 1;
-      const o = p === 0 ? 1 : 0;
-      if (match.players[p].score > match.players[o].score) {
-        if (match.mode_id === GameCode.RANKED_MATCH) upd({ trophies: 100 });
-        else if (match.mode_id === GameCode.HORSE_MATCH) upd({ tokens: 600 });
-        else if (match.mode_id === GameCode.WAGER_MATCH)
-          upd({ tokens: match.prize ? match.prize : 0 });
-      } else if (match.players[p].score === match.players[o].score)
-        upd({ tix: 50 });
-    }
 
-    if (notifType === NotificationCode.GAME_END) {
-      let x = 0;
-      const rec = setInterval(() => {
-        refetchRecent();
-        x++;
-        if (x == 5) clearInterval(rec);
-      }, 1000);
-    }
-  }
+      if (notifType === NotificationCode.GAME_END) {
+        let x = 0;
+        const rec = setTimeout(() => {
+          refetchRecent();
+          // x++;
+          // if (x == 5) clearInterval(rec);
+        }, 2000);
+      }
+    },
+    [upd, wagerFee]
+  );
 
   return (
     <>
@@ -236,24 +242,18 @@ export default function Play() {
           }, 400);
         }}
       />
-      <DarkenedModal
-        visible={showModal === "play"}
-        onDismiss={() => setShowModal(false)}
-      >
+      <DarkenedModal visible={showModal === "play"} onDismiss={closeModal}>
         <GameConfirmDialog
           title={gameConfig.name}
           body={gameConfig.description}
           entryFee={gameConfig.entryFee}
           onCancel={closeModal}
           onConfirm={playGame}
-          disabled={!tix || tix < gameConfig.entryFee}
+          disabled={(!tix && tix !== 0) || tix < gameConfig.entryFee}
           wager={gameConfig.id === GameCode.WAGER_MATCH}
         />
       </DarkenedModal>
-      <DarkenedModal
-        visible={showModal === "active"}
-        onDismiss={() => setShowModal(false)}
-      >
+      <DarkenedModal visible={showModal === "active"} onDismiss={closeModal}>
         {!!activeGame && (
           <ActiveGameDialog
             userID={conn.accounts[0]}
@@ -267,7 +267,7 @@ export default function Play() {
       </DarkenedModal>
       <DarkenedModal
         visible={showModal === "recent"}
-        onDismiss={() => setShowModal(false)}
+        onDismiss={closeModal}
         noPadding
       >
         {!!recapGame && (

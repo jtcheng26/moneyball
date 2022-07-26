@@ -89,7 +89,7 @@ const Game = ({ active, modeConfig, endSession, game, location }: Props) => {
     // --------------------------------
     setTimeout(() => {
       setSessionInfo(sessionInfo);
-    }, 400);
+    }, 500);
 
     // endSession();
   }
@@ -278,6 +278,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     position: "absolute",
+    paddingBottom: 10,
   },
   buttons: {
     // position: "absolute",

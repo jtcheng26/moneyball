@@ -14,13 +14,15 @@ import ButtonText from "../lib/text/ButtonText";
 import SuccessDialog from "../lib/dialogs/SuccessDialog";
 import FailureDialog from "../lib/dialogs/FailureDialog";
 import WalletConnectProvider from "@walletconnect/web3-provider";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { ticketABI } from "../../hooks/api/ticketContract";
 import { tokenABI } from "../../hooks/api/tokenABI";
 import { useWalletConnect } from "@walletconnect/react-native-dapp";
 import useUserData from "../../hooks/useUserData";
 import useTickets from "../../hooks/useTickets";
 import APP_ENV from "../../../env";
+import { parseEther } from "ethers/lib/utils";
+import LoadingDialog from "../lib/dialogs/LoadingDialog";
 
 type Props = {
   amount: number;
@@ -40,13 +42,16 @@ const PurchaseButton = ({
   const [showModal, setShowModal] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
   const [failureModal, setFailureModal] = useState(false);
+  const [waiting, setWaiting] = useState<false | "approval" | "purchase">(
+    false
+  );
   const connector = useWalletConnect();
   async function buy() {
     return new Promise(async (resolve, reject) => {
       try {
-        const keepAlive = setInterval(() => {
-          console.log("Keep alive");
-        }, 2000);
+        // const keepAlive = setInterval(() => {
+        //   console.log("Keep alive");
+        // }, 2000);
         if (!connector.connected) return false;
         const provide = new WalletConnectProvider({
           rpc: {
@@ -72,22 +77,66 @@ const PurchaseButton = ({
         );
         const conn = contr.connect(signer);
 
-        // if (currency === "BTT") {
-        conn.functions
-          .buyTicketsWithBTT(
-            // await signer.getAddress(),
-            amount
-          )
-          .catch((err) => {
-            console.error(err);
-            clearInterval(keepAlive);
-            resolve(false);
-          })
-          .then((r) => {
-            clearInterval(keepAlive);
-            resolve(true);
-          });
-        // }
+        const contrToken = new ethers.Contract(
+          APP_ENV.TOKEN_CONTRACT,
+          tokenABI,
+          ethers_provider
+        );
+
+        const connToken = contrToken.connect(signer);
+
+        const allowance = await connToken.callStatic.allowance(
+          await signer.getAddress(),
+          APP_ENV.TICKET_CONTRACT
+        );
+        if (allowance < price) {
+          setTimeout(async () => {
+            setWaiting("approval");
+            connToken.functions
+              .approve(APP_ENV.TICKET_CONTRACT, parseEther(price + ".0"))
+              .then(async (res) => {
+                await res.wait();
+                setWaiting(false);
+                setTimeout(() => {
+                  buyIt();
+                }, 700);
+              })
+              .catch((err) => {
+                console.log(err);
+                setWaiting(false);
+                setTimeout(() => {
+                  resolve(false);
+                }, 700);
+              });
+          }, 500);
+        } else {
+          setTimeout(() => {
+            buyIt();
+          }, 700);
+        }
+
+        async function buyIt() {
+          setWaiting("purchase");
+          conn.functions
+            .buyTicketsWithBTT(
+              // await signer.getAddress(),
+              amount
+            )
+            .then(async (res) => {
+              await res.wait();
+              setWaiting(false);
+              setTimeout(() => {
+                resolve(true);
+              }, 500);
+            })
+            .catch((err) => {
+              console.log(err);
+              setWaiting(false);
+              setTimeout(() => {
+                resolve(false);
+              }, 500);
+            });
+        }
       } catch (err) {
         console.error(err);
       }
@@ -126,6 +175,16 @@ const PurchaseButton = ({
             }
             setSuccessModal(false);
           }}
+        />
+      </DarkenedModal>
+      <DarkenedModal visible={!!waiting}>
+        <LoadingDialog
+          title={
+            waiting === "approval"
+              ? "Waiting for approval..."
+              : "Processing transaction..."
+          }
+          body="This may take a minute."
         />
       </DarkenedModal>
       <DarkenedModal

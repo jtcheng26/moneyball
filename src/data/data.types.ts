@@ -92,7 +92,7 @@ export interface RawPlayer {
 export interface RawNotification {
   user_id: string;
   code: NotificationCode;
-  data: any;
+  data: RawMatch;
 }
 
 export interface RawGameRequest {

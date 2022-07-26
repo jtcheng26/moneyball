@@ -23,6 +23,7 @@ const DarkenedModal = (props: Props) => {
       hideModalContentWhileAnimating
       style={{ margin: 0 }}
       useNativeDriver
+      avoidKeyboard
     >
       <View
         style={[{ paddingHorizontal: props.noPadding ? 0 : 20 }, styles.modal]}

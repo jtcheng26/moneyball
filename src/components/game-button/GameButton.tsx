@@ -16,9 +16,10 @@ import { GameCode } from "../../data/data.types";
 type Props = {
   config: GameConfig;
   onPress: () => void;
+  disabled?: boolean; // too expensive
 };
 
-const GameButton = ({ config, onPress }: Props) => {
+const GameButton = ({ config, onPress, disabled }: Props) => {
   return (
     <GameCard
       color={config.color}
@@ -37,6 +38,7 @@ const GameButton = ({ config, onPress }: Props) => {
         />
         <View style={styles.entryFee}>
           <TicketText
+            bad={disabled}
             entryFee={
               config.id === GameCode.WAGER_MATCH ? "50+" : config.entryFee
             }
